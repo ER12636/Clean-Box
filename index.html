@@ -14,7 +14,7 @@
     [x-cloak] { display: none !important; }
   </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen pb-32" x-data="cleanBoxApp()" x-cloak>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen pb-48" x-data="cleanBoxApp()" x-cloak>
 
   <!-- Encabezado / Navbar -->
   <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-30">
@@ -29,7 +29,7 @@
         </div>
       </div>
       <!-- Botón acceso Modo Administrador / Dueño -->
-      <button @click="toggleAdmin()" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+      <button @click="showAdmin = !showAdmin" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
         <span x-text="showAdmin ? 'Vista Cliente' : 'Panel Dueño'"></span>
       </button>
@@ -128,9 +128,9 @@
       </button>
     </div>
 
-    <!-- Resumen de productos acumulados (Acordeón / Lista del Cliente) -->
+    <!-- Resumen de productos acumulados -->
     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-      <div class="flex justify-between items-center cursor-pointer select-none" @click="showSummaryList = !showSummaryList">
+      <div class="flex justify-between items-center cursor-pointer" @click="showSummaryList = !showSummaryList">
         <div class="flex items-center gap-2">
           <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
           <h3 class="font-bold text-sm text-slate-800">Tu Lista Acumulada (<span x-text="getActiveProducts().length"></span> productos)</h3>
@@ -141,7 +141,6 @@
         </button>
       </div>
 
-      <!-- Detalle de la lista -->
       <div class="mt-4 pt-3 border-t border-slate-100" x-show="showSummaryList" x-transition>
         <template x-if="getActiveProducts().length === 0">
           <p class="text-xs text-slate-400 text-center py-2">Aún no has agregado productos a tu membresía.</p>
@@ -153,7 +152,7 @@
                 <span class="font-semibold text-slate-700" x-text="item.name"></span>
                 <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold" x-text="formatQty(item.qty, item.unit)"></span>
               </div>
-              <button @click="setQty(item, 0)" class="text-rose-500 hover:text-rose-700 p-1 flex items-center gap-1 font-medium transition" title="Eliminar producto">
+              <button @click="setQty(item, 0)" class="text-rose-500 hover:text-rose-700 p-1 flex items-center gap-1 font-medium transition">
                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                 <span>Eliminar</span>
               </button>
@@ -167,8 +166,6 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       <template x-for="product in products" :key="product.id">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
-          
-          <!-- Encabezado de la tarjeta -->
           <div class="flex justify-between items-start mb-3">
             <div>
               <h3 class="font-bold text-slate-800 text-sm" x-text="product.name"></h3>
@@ -189,7 +186,7 @@
             </div>
           </template>
 
-          <!-- Control de Incremento (+ / -) y Botón Eliminar debajo -->
+          <!-- Control de Incremento y Botón de Eliminar Abajo -->
           <div class="flex flex-col gap-2">
             <div class="flex items-center justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-200">
               <button @click="changeQty(product, -product.step)" class="w-8 h-8 rounded-md bg-white text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-lg hover:bg-slate-100 active:scale-95 transition shadow-sm">-</button>
@@ -197,36 +194,63 @@
               <button @click="changeQty(product, product.step)" class="w-8 h-8 rounded-md bg-emerald-700 text-white flex items-center justify-center font-bold text-lg hover:bg-emerald-800 active:scale-95 transition shadow-sm">+</button>
             </div>
 
-            <!-- Botón de eliminar individual debajo de las cantidades -->
+            <!-- Botón de eliminar debajo de las cantidades -->
             <button x-show="product.qty > 0" @click="setQty(product, 0)" class="text-rose-500 hover:text-rose-700 text-xs font-semibold py-1 px-2 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-50 flex items-center justify-center gap-1.5 transition">
               <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
               <span>Quitar de mi lista</span>
             </button>
           </div>
-
         </div>
       </template>
     </div>
   </main>
 
-  <!-- BARRA INFERIOR FLOTANTE DE TOTALES Y WHATSAPP -->
+  <!-- BARRA INFERIOR FLOTANTE DE TOTALES, DIRECCIÓN (OPCIONAL) Y WHATSAPP -->
   <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-4 z-40" x-show="!showAdmin">
-    <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
-      <div>
-        <div class="flex items-baseline gap-2">
-          <span class="text-xs text-slate-500 font-medium">Precio Membresía:</span>
-          <span class="text-2xl font-black text-emerald-700" x-text="formatCurrency(calculateTotals().salePrice)"></span>
-        </div>
-        <div class="flex items-center gap-1 text-[11px] text-slate-500">
-          <span>Súper tradicional: <span class="line-through" x-text="formatCurrency(calculateTotals().marketPrice)"></span></span>
-          <span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="'¡Ahorras ' + formatCurrency(calculateTotals().savings) + '!'"></span>
+    <div class="max-w-4xl mx-auto flex flex-col gap-3">
+      
+      <!-- Acordeón / Desplegable de Datos de Envío (Opcional) -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <button @click="showAddressForm = !showAddressForm" class="w-full flex items-center justify-between text-xs font-semibold text-slate-700">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
+            <span>Datos de Entrega (Opcional)</span>
+          </div>
+          <span class="text-[11px] text-emerald-600 flex items-center gap-1">
+            <span x-text="showAddressForm ? 'Ocultar campos' : 'Agregar dirección'"></span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" :class="showAddressForm ? 'rotate-180' : ''"></i>
+          </span>
+        </button>
+
+        <!-- Campos de dirección -->
+        <div x-show="showAddressForm" x-transition class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pt-2 border-t border-slate-200">
+          <input type="text" x-model="shipping.name" placeholder="Tu Nombre completo" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.cp" placeholder="Código Postal (C.P.)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.colonia" placeholder="Colonia" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.street" placeholder="Calle y Número" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500 md:col-span-2">
+          <input type="text" x-model="shipping.extra" placeholder="Apto / Suite / Edificio (opcional)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
         </div>
       </div>
 
-      <button @click="sendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95">
-        <i data-lucide="message-circle" class="w-5 h-5"></i>
-        <span class="text-sm">Pedir Membresía</span>
-      </button>
+      <!-- Fila Inferior con Totales y Botón Pedir -->
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-slate-500 font-medium">Precio Membresía:</span>
+            <span class="text-2xl font-black text-emerald-700" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] text-slate-500">
+            <span>Súper tradicional: <span class="line-through" x-text="formatCurrency(calculateTotals().marketPrice)"></span></span>
+            <span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="'¡Ahorras ' + formatCurrency(calculateTotals().savings) + '!'"></span>
+          </div>
+        </div>
+
+        <button @click="sendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95 shrink-0">
+          <i data-lucide="message-circle" class="w-5 h-5"></i>
+          <span class="text-sm">Pedir Membresía</span>
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -235,7 +259,17 @@
       return {
         showAdmin: false,
         showSummaryList: true,
+        showAddressForm: false,
         targetMargin: 40,
+
+        // Datos de entrega opcionales
+        shipping: {
+          name: '',
+          cp: '',
+          colonia: '',
+          street: '',
+          extra: ''
+        },
 
         products: [
           { id: 'zote', name: 'Barra Zote (400g)', qty: 1.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
@@ -259,33 +293,22 @@
         ],
 
         init() {
-          this.refreshIcons();
-        },
-
-        toggleAdmin() {
-          this.showAdmin = !this.showAdmin;
-          this.refreshIcons();
-        },
-
-        refreshIcons() {
-          this.$nextTick(() => { 
-            if (window.lucide) lucide.createIcons(); 
-          });
+          this.$nextTick(() => { lucide.createIcons(); });
         },
 
         changeQty(product, delta) {
           product.qty = Math.max(0, Math.round((product.qty + delta) * 100) / 100);
-          this.refreshIcons();
+          this.$nextTick(() => { lucide.createIcons(); });
         },
 
         setQty(product, val) {
           product.qty = val;
-          this.refreshIcons();
+          this.$nextTick(() => { lucide.createIcons(); });
         },
 
         resetCart() {
           this.products.forEach(p => p.qty = 0);
-          this.refreshIcons();
+          this.$nextTick(() => { lucide.createIcons(); });
         },
 
         getActiveProducts() {
@@ -334,8 +357,19 @@
             return;
           }
 
-          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n\n¿Me podrías confirmar la entrega?`;
-          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+          let addressText = '';
+          if (this.shipping.name || this.shipping.street || this.shipping.colonia || this.shipping.cp) {
+            addressText = `\n📍 *Datos de Entrega:*\n` +
+              (this.shipping.name ? `• Nombre: ${this.shipping.name}\n` : '') +
+              (this.shipping.street ? `• Calle y Núm: ${this.shipping.street}\n` : '') +
+              (this.shipping.extra ? `• Apto/Suite: ${this.shipping.extra}\n` : '') +
+              (this.shipping.colonia ? `• Colonia: ${this.shipping.colonia}\n` : '') +
+              (this.shipping.cp ? `• C.P.: ${this.shipping.cp}\n` : '');
+          }
+
+          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}${addressText}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n\n¿Me podrías confirmar la entrega?`;
+          
+          window.open(`https://wa.me/525545256011?text=${encodeURIComponent(text)}`, '_blank');
         }
       }
     }
