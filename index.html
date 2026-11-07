@@ -293,16 +293,31 @@
         ],
 
         init() {
+          // Revisa si ya habías puesto la contraseña en esta misma pestaña o sesión abierta
+          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
+            // Ya estaba autorizado previamente en esta sesión
+          }
           this.$nextTick(() => { lucide.createIcons(); });
         },
 
         requestAdminAccess() {
+          // Si ya está abierto el panel, simplemente lo cerramos o alternamos
           if (this.showAdmin) {
             this.showAdmin = false;
             return;
           }
+
+          // Si ya se autenticó antes en esta sesión, abre directo sin pedir PIN
+          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
+            this.showAdmin = true;
+            this.$nextTick(() => { lucide.createIcons(); });
+            return;
+          }
+
+          // Si es la primera vez, pide la contraseña
           const ingreso = prompt("Introduce tu PIN de administrador:");
           if (ingreso === this.adminPin) {
+            sessionStorage.setItem('cleanbox_admin_auth', 'true'); // Guarda autorización temporal en la sesión
             this.showAdmin = true;
             this.$nextTick(() => { lucide.createIcons(); });
           } else if (ingreso !== null) {
@@ -402,5 +417,3 @@
   </script>
 </body>
 </html>
-
-```
