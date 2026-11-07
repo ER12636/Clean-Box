@@ -28,10 +28,9 @@
           <p class="text-xs text-emerald-100">Arma tu Membresía de Limpieza a Medida</p>
         </div>
       </div>
-      <!-- Botón seguro de acceso al Panel Dueño -->
-      <button @click="requestAdminAccess()" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
-        <i data-lucide="shield-check" class="w-4 h-4"></i>
-        <span x-text="showAdmin ? 'Vista Cliente' : 'Panel Dueño'"></span>
+      <!-- Botón seguro de acceso al Panel Dueño (Solo ícono) -->
+      <button @click="requestAdminAccess()" class="bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 p-2.5 rounded-lg flex items-center justify-center transition" title="Panel Dueño">
+        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-200"></i>
       </button>
     </div>
   </header>
@@ -262,8 +261,7 @@
         showAddressForm: false,
         targetMargin: 35,
 
-        // CAMBIA AQUÍ TU CONTRASEÑA SECRETA SI LO DESEAS
-        adminPin: '1234',
+        adminPin: 'niko10emma17',
 
         shipping: {
           name: '',
@@ -274,7 +272,7 @@
         },
 
         products: [
-          { id: 'zote', name: 'Barra Zote (400g)', qty: 0.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
+          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
           { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
           { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
           { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
@@ -288,7 +286,7 @@
           { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
           { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
           { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
-          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
+          { id: 'zote', name: 'Barra Zote (400g)', qty: 0.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
           { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
           { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
           { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
@@ -298,7 +296,6 @@
           this.$nextTick(() => { lucide.createIcons(); });
         },
 
-        // Función que pide contraseña al hacer clic en Panel Dueño
         requestAdminAccess() {
           if (this.showAdmin) {
             this.showAdmin = false;
@@ -380,16 +377,23 @@
           }
 
           let addressText = '';
-          if (this.shipping.name || this.shipping.street || this.shipping.colonia || this.shipping.cp) {
-            addressText = `\n📍 *Datos de Entrega:*\n` +
+          if (this.shipping.name || this.shipping.street || this.shipping.colonia || this.shipping.cp || this.shipping.extra) {
+            addressText = `\n📋 *COMPROBANTE DE DOMICILIO Y ENTREGA:*\n` +
               (this.shipping.name ? `• Nombre: ${this.shipping.name}\n` : '') +
               (this.shipping.street ? `• Calle y Núm: ${this.shipping.street}\n` : '') +
               (this.shipping.extra ? `• Apto/Suite: ${this.shipping.extra}\n` : '') +
               (this.shipping.colonia ? `• Colonia: ${this.shipping.colonia}\n` : '') +
               (this.shipping.cp ? `• C.P.: ${this.shipping.cp}\n` : '');
+          } else {
+            addressText = `\n📋 *COMPROBANTE DE ENTREGA:*\n• Domicilio: (No especificado por el cliente)\n`;
           }
 
-          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}${addressText}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)} *(Ahorro vs Súper: ${this.formatCurrency(totals.savings)})*\n\n¿Me podrías confirmar la entrega?`;
+          const text = `📄 *DOCUMENTO DE PEDIDO - CLEAN BOX*\n\n` +
+            `🛒 *Lista de Productos Seleccionados:*\n${itemsList}\n` +
+            `${addressText}\n` +
+            `💰 *Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n` +
+            `✨ *Ahorro vs Súper:* ${this.formatCurrency(totals.savings)}\n\n` +
+            `¿Me podrías confirmar mi pedido y la entrega?`;
           
           window.open(`https://wa.me/525545256011?text=${encodeURIComponent(text)}`, '_blank');
         }
@@ -398,3 +402,5 @@
   </script>
 </body>
 </html>
+
+```
