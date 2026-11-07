@@ -1,0 +1,288 @@
+# Clean-Box
+Aquí tienes el código completo de la aplicación web listo para copiar y pegar:
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Clean Box - Tu Membresía de Limpieza</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen pb-24" x-data="cleanBoxApp()" x-cloak>
+
+  <!-- Encabezado / Navbar -->
+  <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+          <i data-lucide="sparkles" class="w-6 h-6 text-emerald-200"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Clean Box</h1>
+          <p class="text-xs text-emerald-100">Arma tu Membresía de Limpieza a Medida</p>
+        </div>
+      </div>
+      <!-- Botón acceso Modo Administrador / Dueño -->
+      <button @click="showAdmin = !showAdmin" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+        <i data-lucide="shield-check" class="w-4 h-4"></i>
+        <span x-text="showAdmin ? 'Vista Cliente' : 'Panel Dueño'"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Banner Informativo Cliente -->
+  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 shadow-inner" x-show="!showAdmin">
+    <div class="max-w-4xl mx-auto flex items-center justify-between text-xs md:text-sm">
+      <div class="flex items-center gap-2">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
+        <span>Elige los litros o piezas exactas que necesites. ¡Paga un solo precio de membresía súper reducido!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO) -->
+  <section x-show="showAdmin" class="max-w-4xl mx-auto p-4 md:p-6 bg-slate-900 text-slate-100 rounded-2xl my-6 shadow-2xl border border-slate-800">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+          <i data-lucide="calculator" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold">Panel Interno de Costos y Margen</h2>
+          <p class="text-xs text-slate-400">Control de utilidades privadas (no visible para clientes)</p>
+        </div>
+      </div>
+      <span class="text-xs font-semibold bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">Privado</span>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Tu Costo Total (Insumos)</span>
+        <span class="text-2xl font-extrabold text-rose-400" x-text="formatCurrency(calculateTotals().totalCost)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Precio de Venta al Cliente</span>
+        <span class="text-2xl font-extrabold text-emerald-400" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta</span>
+        <span class="text-2xl font-extrabold text-amber-400" x-text="formatCurrency(calculateTotals().profit)"></span>
+      </div>
+    </div>
+
+    <!-- Ajuste de Margen Deseado -->
+    <div class="bg-slate-800 p-4 rounded-xl mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Objetiva:</label>
+        <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
+      </div>
+      <input type="range" min="30" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+        <span>30% (Descuento)</span>
+        <span>40% - 50% (Recomendado)</span>
+        <span>60% (Máximo)</span>
+      </div>
+    </div>
+
+    <!-- Tabla Interna de Costos -->
+    <div class="overflow-x-auto rounded-lg border border-slate-800">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
+          <tr>
+            <th class="p-3">Producto</th>
+            <th class="p-3 text-center">Cantidad</th>
+            <th class="p-3 text-right">Costo Unit.</th>
+            <th class="p-3 text-right">Subtotal Costo</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <template x-for="item in products" :key="item.id">
+            <tr x-show="item.qty > 0" class="hover:bg-slate-800/40">
+              <td class="p-3 font-medium" x-text="item.name"></td>
+              <td class="p-3 text-center" x-text="formatQty(item.qty, item.unit)"></td>
+              <td class="p-3 text-right text-slate-400" x-text="formatCurrency(item.costPrice)"></td>
+              <td class="p-3 text-right font-semibold text-rose-300" x-text="formatCurrency(item.costPrice * item.qty)"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VISTA DEL CLIENTE -->
+  <main class="max-w-4xl mx-auto px-4 py-6" x-show="!showAdmin">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Arma tu Paquete Personalizado</h2>
+        <p class="text-xs text-slate-500">Selecciona las cantidades necesarias para el aseo de tu hogar</p>
+      </div>
+      <button @click="resetCart()" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Limpiar</span>
+      </button>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <template x-for="product in products" :key="product.id">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm" x-text="product.name"></h3>
+              <span class="text-[11px] text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1">Incluido en Membresía</span>
+            </div>
+            <div class="text-right">
+              <!-- No muestra precio unitario al cliente -->
+              <span class="text-xs text-slate-400 font-medium block">Cantidad</span>
+              <span class="text-sm font-bold text-slate-700" x-text="formatQty(product.qty, product.unit)"></span>
+            </div>
+          </div>
+
+          <!-- Botones de Selección Rápida para Líquidos -->
+          <template x-if="product.unit === 'L'">
+            <div class="flex gap-1.5 mb-3">
+              <button @click="setQty(product, 0.25)" :class="product.qty === 0.25 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">250 ml</button>
+              <button @click="setQty(product, 0.5)" :class="product.qty === 0.5 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">500 ml</button>
+              <button @click="setQty(product, 1.0)" :class="product.qty === 1.0 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">1 L</button>
+            </div>
+          </template>
+
+          <!-- Control de Incremento (+ / -) -->
+          <div class="flex items-center justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+            <button @click="changeQty(product, -product.step)" class="w-8 h-8 rounded-md bg-white text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-lg hover:bg-slate-100 active:scale-95 transition shadow-sm">-</button>
+            <span class="text-sm font-bold text-slate-800" x-text="formatQty(product.qty, product.unit)"></span>
+            <button @click="changeQty(product, product.step)" class="w-8 h-8 rounded-md bg-emerald-700 text-white flex items-center justify-center font-bold text-lg hover:bg-emerald-800 active:scale-95 transition shadow-sm">+</button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </main>
+
+  <!-- BARRA INFERIOR FLOTANTE DE TOTALES Y WHATSAPP -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-4 z-40" x-show="!showAdmin">
+    <div class="max-w-4xl mx-auto flex items-center justify-between gap-4">
+      <div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-xs text-slate-500 font-medium">Precio Membresía:</span>
+          <span class="text-2xl font-black text-emerald-700" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+        </div>
+        <!-- Muestra el Ahorro estimado comparado con el Súper -->
+        <div class="flex items-center gap-1 text-[11px] text-slate-500">
+          <span>Súper tradicional: <span class="line-through" x-text="formatCurrency(calculateTotals().marketPrice)"></span></span>
+          <span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="'¡Ahorras ' + formatCurrency(calculateTotals().savings) + '!'"></span>
+        </div>
+      </div>
+
+      <button @click="sendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95">
+        <i data-lucide="message-circle" class="w-5 h-5"></i>
+        <span class="text-sm">Pedir Membresía</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    function cleanBoxApp() {
+      return {
+        showAdmin: false,
+        targetMargin: 40, // Margen por defecto 40%
+
+        // Productos con costos exactos
+        products: [
+          { id: 'zote', name: 'Barra Zote (400g)', qty: 1.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
+          { id: 'desmugrante', name: 'Desmugrante', qty: 1.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'fabuloso', name: 'Fabuloso', qty: 2.5, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
+          { id: 'pino', name: 'Pino Verde', qty: 1.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
+          { id: 'cloro', name: 'Cloro', qty: 3.0, unit: 'L', step: 0.25, costPrice: 5.50, marketPrice: 16.50 },
+          { id: 'quitasarro', name: 'Quitasarro', qty: 1.0, unit: 'L', step: 0.25, costPrice: 11.90, marketPrice: 40.00 },
+          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 30.00 },
+          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 2.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 2.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 40.00 },
+          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 2.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 50.00 },
+          { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95, marketPrice: 75.00 },
+          { id: 'suavitel', name: 'Suavitel azul', qty: 3.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
+          { id: 'vel_rosita', name: 'Vel Rosita', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
+          { id: 'vanish', name: 'Vanish', qty: 2.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
+          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 1.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
+          { id: 'mas_color', name: 'Más Color', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_negro', name: 'Más Negro', qty: 0.5, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.5, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
+        ],
+
+        init() {
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        changeQty(product, delta) {
+          product.qty = Math.max(0, Math.round((product.qty + delta) * 100) / 100);
+        },
+
+        setQty(product, val) {
+          product.qty = val;
+        },
+
+        resetCart() {
+          this.products.forEach(p => p.qty = 0);
+        },
+
+        formatQty(qty, unit) {
+          if (unit === 'pieza') return `${qty} pieza${qty !== 1 ? 's' : ''}`;
+          if (qty < 1 && qty > 0) return `${Math.round(qty * 1000)} ml`;
+          return `${qty} L`;
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+        },
+
+        calculateTotals() {
+          let totalCost = 0;
+          let marketPrice = 0;
+
+          this.products.forEach(p => {
+            totalCost += p.qty * p.costPrice;
+            marketPrice += p.qty * p.marketPrice;
+          });
+
+          const marginDecimal = this.targetMargin / 100;
+          const salePrice = totalCost > 0 ? totalCost / (1 - marginDecimal) : 0;
+          const profit = salePrice - totalCost;
+          const savings = Math.max(0, marketPrice - salePrice);
+
+          return { totalCost, salePrice, profit, marketPrice, savings };
+        },
+
+        sendWhatsApp() {
+          const totals = this.calculateTotals();
+          let itemsList = '';
+          
+          this.products.forEach(p => {
+            if (p.qty > 0) {
+              itemsList += `• ${p.name}: ${this.formatQty(p.qty, p.unit)}\n`;
+            }
+          });
+
+          if (!itemsList) {
+            alert('Por favor selecciona al menos un producto para armar tu membresía.');
+            return;
+          }
+
+          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n\n¿Me podrías confirmar la entrega?`;
+          window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
+```
