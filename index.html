@@ -28,8 +28,8 @@
           <p class="text-xs text-emerald-100">Arma tu Membresía de Limpieza a Medida</p>
         </div>
       </div>
-      <!-- Botón acceso Modo Administrador / Dueño -->
-      <button @click="showAdmin = !showAdmin" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
+      <!-- Botón seguro de acceso al Panel Dueño -->
+      <button @click="requestAdminAccess()" class="text-xs bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 px-3 py-2 rounded-lg flex items-center gap-1.5 transition">
         <i data-lucide="shield-check" class="w-4 h-4"></i>
         <span x-text="showAdmin ? 'Vista Cliente' : 'Panel Dueño'"></span>
       </button>
@@ -41,12 +41,12 @@
     <div class="max-w-4xl mx-auto flex items-center justify-between text-xs md:text-sm">
       <div class="flex items-center gap-2">
         <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
-        <span>Elige los litros o piezas exactas que necesites. ¡Paga un solo precio de membresía súper reducido!</span>
+        <span>Elige los litros o piezas exactas que necesites. ¡Paga un solo precio de membresía súper reducido frente al súper!</span>
       </div>
     </div>
   </div>
 
-  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO) -->
+  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO CON CONTRASEÑA) -->
   <section x-show="showAdmin" class="max-w-4xl mx-auto p-4 md:p-6 bg-slate-900 text-slate-100 rounded-2xl my-6 shadow-2xl border border-slate-800">
     <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
       <div class="flex items-center gap-3">
@@ -55,10 +55,10 @@
         </div>
         <div>
           <h2 class="text-lg font-bold">Panel Interno de Costos y Margen</h2>
-          <p class="text-xs text-slate-400">Control de utilidades privadas (no visible para clientes)</p>
+          <p class="text-xs text-slate-400">Control de utilidades privadas (Acceso exclusivo autorizado)</p>
         </div>
       </div>
-      <span class="text-xs font-semibold bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full border border-emerald-500/30">Privado</span>
+      <button @click="showAdmin = false" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cerrar Panel</button>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -82,11 +82,11 @@
         <label class="text-xs font-medium text-slate-300">Margen de Ganancia Objetiva:</label>
         <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
       </div>
-      <input type="range" min="30" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      <input type="range" min="25" max="50" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
       <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-        <span>30% (Descuento)</span>
-        <span>40% - 50% (Recomendado)</span>
-        <span>60% (Máximo)</span>
+        <span>25% (Súper competitivo)</span>
+        <span>35% (Recomendado para buen margen y ahorro brutal)</span>
+        <span>50% (Máximo)</span>
       </div>
     </div>
 
@@ -143,7 +143,7 @@
 
       <div class="mt-4 pt-3 border-t border-slate-100" x-show="showSummaryList" x-transition>
         <template x-if="getActiveProducts().length === 0">
-          <p class="text-xs text-slate-400 text-center py-2">Aún no has agregado productos a tu membresía.</p>
+          <p class="text-xs text-slate-400 text-center py-2">Aún no has agregado productos a tu membresía. Selecciona abajo lo que necesites.</p>
         </template>
         <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
           <template x-for="item in getActiveProducts()" :key="item.id">
@@ -260,9 +260,11 @@
         showAdmin: false,
         showSummaryList: true,
         showAddressForm: false,
-        targetMargin: 40,
+        targetMargin: 35,
 
-        // Datos de entrega opcionales
+        // CAMBIA AQUÍ TU CONTRASEÑA SECRETA SI LO DESEAS
+        adminPin: '1234',
+
         shipping: {
           name: '',
           cp: '',
@@ -272,28 +274,43 @@
         },
 
         products: [
-          { id: 'zote', name: 'Barra Zote (400g)', qty: 1.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
-          { id: 'desmugrante', name: 'Desmugrante', qty: 1.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
-          { id: 'fabuloso', name: 'Fabuloso', qty: 2.5, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
-          { id: 'pino', name: 'Pino Verde', qty: 1.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
-          { id: 'cloro', name: 'Cloro', qty: 3.0, unit: 'L', step: 0.25, costPrice: 5.50, marketPrice: 16.50 },
-          { id: 'quitasarro', name: 'Quitasarro', qty: 1.0, unit: 'L', step: 0.25, costPrice: 11.90, marketPrice: 40.00 },
-          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 30.00 },
-          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 2.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
-          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 2.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 40.00 },
-          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 2.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 50.00 },
+          { id: 'zote', name: 'Barra Zote (400g)', qty: 0.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
+          { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
+          { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
+          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 5.50, marketPrice: 16.50 },
+          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 11.90, marketPrice: 40.00 },
+          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 30.00 },
+          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 40.00 },
+          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 50.00 },
           { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95, marketPrice: 75.00 },
-          { id: 'suavitel', name: 'Suavitel azul', qty: 3.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
-          { id: 'vel_rosita', name: 'Vel Rosita', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
-          { id: 'vanish', name: 'Vanish', qty: 2.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
-          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 1.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
-          { id: 'mas_color', name: 'Más Color', qty: 1.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
-          { id: 'mas_negro', name: 'Más Negro', qty: 0.5, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
-          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.5, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
+          { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
+          { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
+          { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
+          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
+          { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
         ],
 
         init() {
           this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        // Función que pide contraseña al hacer clic en Panel Dueño
+        requestAdminAccess() {
+          if (this.showAdmin) {
+            this.showAdmin = false;
+            return;
+          }
+          const ingreso = prompt("Introduce tu PIN de administrador:");
+          if (ingreso === this.adminPin) {
+            this.showAdmin = true;
+            this.$nextTick(() => { lucide.createIcons(); });
+          } else if (ingreso !== null) {
+            alert("PIN incorrecto. Acceso denegado.");
+          }
         },
 
         changeQty(product, delta) {
@@ -335,7 +352,12 @@
           });
 
           const marginDecimal = this.targetMargin / 100;
-          const salePrice = totalCost > 0 ? totalCost / (1 - marginDecimal) : 0;
+          let salePrice = totalCost > 0 ? totalCost / (1 - marginDecimal) : 0;
+          
+          if (salePrice > marketPrice && marketPrice > 0) {
+            salePrice = marketPrice * 0.85;
+          }
+
           const profit = salePrice - totalCost;
           const savings = Math.max(0, marketPrice - salePrice);
 
@@ -367,7 +389,7 @@
               (this.shipping.cp ? `• C.P.: ${this.shipping.cp}\n` : '');
           }
 
-          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}${addressText}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n\n¿Me podrías confirmar la entrega?`;
+          const text = `¡Hola! Me gustaría encargar mi *Membresía Personalizada Clean Box*:\n\n${itemsList}${addressText}\n*Precio Membresía:* ${this.formatCurrency(totals.salePrice)} *(Ahorro vs Súper: ${this.formatCurrency(totals.savings)})*\n\n¿Me podrías confirmar la entrega?`;
           
           window.open(`https://wa.me/525545256011?text=${encodeURIComponent(text)}`, '_blank');
         }
