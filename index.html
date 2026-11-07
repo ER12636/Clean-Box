@@ -3,7 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Clean Box - Tu Membresía de Limpieza</title>
+  
+  <!-- SEO Básico -->
+  <title>Clean Box - Tu Membresía de Productos de Limpieza a Domicilio</title>
+  <meta name="description" content="Arma tu paquete de limpieza a medida con Clean Box. Litros y piezas exactas de cloro, fabuloso, desmugrante y más, a precios de membresía reducidos a domicilio.">
+  <meta name="keywords" content="Clean Box, productos de limpieza a domicilio, membresia de limpieza, cloro, detergente liquido, suavitel, desmugrante, artículos de aseo para el hogar">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph para vistas previas en WhatsApp y Redes Sociales -->
+  <meta property="og:title" content="Clean Box - Tu Membresía de Limpieza a Medida">
+  <meta property="og:description" content="Selecciona las cantidades exactas para el aseo de tu hogar y ahorra en comparación con el supermercado. ¡Pide tu membresía directo por WhatsApp!">
+  <meta property="og:type" content="website">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Alpine.js CDN -->
@@ -293,31 +304,27 @@
         ],
 
         init() {
-          // Revisa si ya habías puesto la contraseña en esta misma pestaña o sesión abierta
           if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
-            // Ya estaba autorizado previamente en esta sesión
+            // Sesión de administrador recordada
           }
           this.$nextTick(() => { lucide.createIcons(); });
         },
 
         requestAdminAccess() {
-          // Si ya está abierto el panel, simplemente lo cerramos o alternamos
           if (this.showAdmin) {
             this.showAdmin = false;
             return;
           }
 
-          // Si ya se autenticó antes en esta sesión, abre directo sin pedir PIN
           if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
             this.showAdmin = true;
             this.$nextTick(() => { lucide.createIcons(); });
             return;
           }
 
-          // Si es la primera vez, pide la contraseña
           const ingreso = prompt("Introduce tu PIN de administrador:");
           if (ingreso === this.adminPin) {
-            sessionStorage.setItem('cleanbox_admin_auth', 'true'); // Guarda autorización temporal en la sesión
+            sessionStorage.setItem('cleanbox_admin_auth', 'true');
             this.showAdmin = true;
             this.$nextTick(() => { lucide.createIcons(); });
           } else if (ingreso !== null) {
