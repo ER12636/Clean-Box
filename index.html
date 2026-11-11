@@ -56,7 +56,7 @@
     </div>
   </div>
 
-  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO CON CONTRASEÑA - AQUÍ SÍ SE VEN LAS GANANCIAS) -->
+  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO CON CONTRASEÑA) -->
   <section x-show="showAdmin" class="max-w-4xl mx-auto p-4 md:p-6 bg-slate-900 text-slate-100 rounded-2xl my-6 shadow-2xl border border-slate-800">
     <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
       <div class="flex items-center gap-3">
@@ -64,25 +64,24 @@
           <i data-lucide="calculator" class="w-6 h-6"></i>
         </div>
         <div>
-          <h2 class="text-lg font-bold">Panel Privado de Costos y Rentabilidad</h2>
-          <p class="text-xs text-slate-400">Control estricto de ganancias (Insumos + Envases)</p>
+          <h2 class="text-lg font-bold">Panel Interno de Costos y Margen</h2>
+          <p class="text-xs text-slate-400">Control de utilidades privadas (Acceso exclusivo autorizado)</p>
         </div>
       </div>
       <button @click="showAdmin = false" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cerrar Panel</button>
     </div>
 
-    <!-- TARJETAS DE RENTABILIDAD EXCLUSIVAS DEL DUEÑO -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
       <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Costo Total (Insumos + Envases)</span>
+        <span class="text-xs text-slate-400 block mb-1">Tu Costo Total (Insumos)</span>
         <span class="text-2xl font-extrabold text-rose-400" x-text="formatCurrency(calculateTotals().totalCost)"></span>
       </div>
       <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Precio Venta al Cliente</span>
+        <span class="text-xs text-slate-400 block mb-1">Precio de Venta al Cliente</span>
         <span class="text-2xl font-extrabold text-emerald-400" x-text="formatCurrency(calculateTotals().salePrice)"></span>
       </div>
       <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta Real</span>
+        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta</span>
         <span class="text-2xl font-extrabold text-amber-400" x-text="formatCurrency(calculateTotals().profit)"></span>
       </div>
     </div>
@@ -90,25 +89,25 @@
     <!-- Ajuste de Margen Deseado -->
     <div class="bg-slate-800 p-4 rounded-xl mb-6">
       <div class="flex justify-between items-center mb-2">
-        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Porcentual Objetivo:</label>
+        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Objetiva:</label>
         <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
       </div>
-      <input type="range" min="25" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      <input type="range" min="25" max="50" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
       <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-        <span>25% (Competitivo)</span>
-        <span>35% (Recomendado con envases)</span>
-        <span>60% (Alto margen)</span>
+        <span>25% (Súper competitivo)</span>
+        <span>35% (Recomendado para buen margen y ahorro brutal)</span>
+        <span>50% (Máximo)</span>
       </div>
     </div>
 
-    <!-- Tabla Interna de Costos y Utilidades del Carrito Actual -->
+    <!-- Tabla Interna de Costos -->
     <div class="overflow-x-auto rounded-lg border border-slate-800">
       <table class="w-full text-xs text-left">
         <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
           <tr>
             <th class="p-3">Producto</th>
             <th class="p-3 text-center">Cantidad</th>
-            <th class="p-3 text-right">Costo Unit. (Insumo + Envase)</th>
+            <th class="p-3 text-right">Costo Unit.</th>
             <th class="p-3 text-right">Subtotal Costo</th>
           </tr>
         </thead>
@@ -126,7 +125,7 @@
     </div>
   </section>
 
-  <!-- VISTA DEL CLIENTE (SIN NÚMEROS DE GANANCIA NI COSTOS INTERNOS) -->
+  <!-- VISTA DEL CLIENTE -->
   <main class="max-w-4xl mx-auto px-4 py-6" x-show="!showAdmin">
     <div class="flex justify-between items-center mb-6">
       <div>
@@ -283,26 +282,25 @@
           extra: ''
         },
 
-        // Costos actualizados sumando el costo proporcional del envase de la factura ($6.03 para envases de 3.5L armados)
         products: [
-          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50 + 6.03, marketPrice: 38.00 },
-          { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 60.00 },
-          { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90 + 6.03, marketPrice: 30.00 },
-          { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90 + 6.03, marketPrice: 28.00 },
-          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 5.50 + 6.03, marketPrice: 16.50 },
-          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 11.90 + 6.03, marketPrice: 40.00 },
-          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 30.00 },
-          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 60.00 },
-          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 40.00 },
-          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 50.00 },
-          { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95 + 6.03, marketPrice: 75.00 },
-          { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 35.00 },
-          { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 44.00 },
-          { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 70.00 },
+          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
+          { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
+          { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
+          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 5.50, marketPrice: 16.50 },
+          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 11.90, marketPrice: 40.00 },
+          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 30.00 },
+          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
+          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 40.00 },
+          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 50.00 },
+          { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95, marketPrice: 75.00 },
+          { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
+          { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
+          { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
           { id: 'zote', name: 'Barra Zote (400g)', qty: 0.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
-          { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 },
-          { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 },
-          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 }
+          { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
+          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
         ],
 
         init() {
@@ -426,5 +424,3 @@
   </script>
 </body>
 </html>
-
-          
