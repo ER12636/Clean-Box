@@ -1,4 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Básico -->
+  <title>Clean Box - Tu Membresía de Productos de Limpieza a Domicilio</title>
+  <meta name="description" content="Arma tu paquete de limpieza a medida con Clean Box. Litros y piezas exactas de cloro, fabuloso, desmugrante y más, a precios de membresía reducidos a domicilio.">
+  <meta name="keywords" content="Clean Box, productos de limpieza a domicilio, membresia de limpieza, cloro, detergente liquido, suavitel, desmugrante, artículos de aseo para el hogar">
+  <meta name="robots" content="index, follow">
+  
+  <!-- Open Graph para vistas previas en WhatsApp y Redes Sociales -->
+  <meta property="og:title" content="Clean Box - Tu Membresía de Limpieza a Medida">
+  <meta property="og:description" content="Selecciona las cantidades exactas para el aseo de tu hogar y ahorra en comparación con el supermercado. ¡Pide tu membresía directo por WhatsApp!">
+  <meta property="og:type" content="website">
 
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine.js CDN -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen pb-48" x-data="cleanBoxApp()" x-cloak>
+
+  <!-- Encabezado / Navbar -->
+  <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-30">
+    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
+          <i data-lucide="sparkles" class="w-6 h-6 text-emerald-200"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight">Clean Box</h1>
+          <p class="text-xs text-emerald-100">Arma tu Membresía de Limpieza a Medida</p>
+        </div>
+      </div>
+      <!-- Botón seguro de acceso al Panel Dueño (Solo ícono) -->
+      <button @click="requestAdminAccess()" class="bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 p-2.5 rounded-lg flex items-center justify-center transition" title="Panel Dueño">
+        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-200"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Banner Informativo Cliente -->
+  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 shadow-inner" x-show="!showAdmin">
+    <div class="max-w-4xl mx-auto flex items-center justify-between text-xs md:text-sm">
+      <div class="flex items-center gap-2">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
+        <span>Elige los litros o piezas exactas que necesites. ¡Paga un solo precio de membresía súper reducido frente al súper!</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO CON CONTRASEÑA - AQUÍ SÍ SE VEN LAS GANANCIAS) -->
+  <section x-show="showAdmin" class="max-w-4xl mx-auto p-4 md:p-6 bg-slate-900 text-slate-100 rounded-2xl my-6 shadow-2xl border border-slate-800">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
+          <i data-lucide="calculator" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold">Panel Privado de Costos y Rentabilidad</h2>
+          <p class="text-xs text-slate-400">Control estricto de ganancias (Insumos + Envases)</p>
+        </div>
+      </div>
+      <button @click="showAdmin = false" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cerrar Panel</button>
+    </div>
+
+    <!-- TARJETAS DE RENTABILIDAD EXCLUSIVAS DEL DUEÑO -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Costo Total (Insumos + Envases)</span>
+        <span class="text-2xl font-extrabold text-rose-400" x-text="formatCurrency(calculateTotals().totalCost)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Precio Venta al Cliente</span>
+        <span class="text-2xl font-extrabold text-emerald-400" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta Real</span>
+        <span class="text-2xl font-extrabold text-amber-400" x-text="formatCurrency(calculateTotals().profit)"></span>
+      </div>
+    </div>
+
+    <!-- Ajuste de Margen Deseado -->
+    <div class="bg-slate-800 p-4 rounded-xl mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Porcentual Objetivo:</label>
+        <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
+      </div>
+      <input type="range" min="25" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+        <span>25% (Competitivo)</span>
+        <span>35% (Recomendado con envases)</span>
+        <span>60% (Alto margen)</span>
+      </div>
+    </div>
+
+    <!-- Tabla Interna de Costos y Utilidades del Carrito Actual -->
+    <div class="overflow-x-auto rounded-lg border border-slate-800">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
+          <tr>
+            <th class="p-3">Producto</th>
+            <th class="p-3 text-center">Cantidad</th>
+            <th class="p-3 text-right">Costo Unit. (Insumo + Envase)</th>
+            <th class="p-3 text-right">Subtotal Costo</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <template x-for="item in products" :key="item.id">
+            <tr x-show="item.qty > 0" class="hover:bg-slate-800/40">
+              <td class="p-3 font-medium" x-text="item.name"></td>
+              <td class="p-3 text-center" x-text="formatQty(item.qty, item.unit)"></td>
+              <td class="p-3 text-right text-slate-400" x-text="formatCurrency(item.costPrice)"></td>
+              <td class="p-3 text-right font-semibold text-rose-300" x-text="formatCurrency(item.costPrice * item.qty)"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VISTA DEL CLIENTE (SIN NÚMEROS DE GANANCIA NI COSTOS INTERNOS) -->
+  <main class="max-w-4xl mx-auto px-4 py-6" x-show="!showAdmin">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Arma tu Paquete Personalizado</h2>
+        <p class="text-xs text-slate-500">Selecciona las cantidades necesarias para el aseo de tu hogar</p>
+      </div>
+      <button @click="resetCart()" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Limpiar Todo</span>
+      </button>
+    </div>
+
+    <!-- Resumen de productos acumulados -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+      <div class="flex justify-between items-center cursor-pointer" @click="showSummaryList = !showSummaryList">
+        <div class="flex items-center gap-2">
           <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
           <h3 class="font-bold text-sm text-slate-800">Tu Lista Acumulada (<span x-text="getActiveProducts().length"></span> productos)</h3>
         </div>
@@ -139,25 +283,26 @@
           extra: ''
         },
 
+        // Costos actualizados sumando el costo proporcional del envase de la factura ($6.03 para envases de 3.5L armados)
         products: [
-          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50, marketPrice: 38.00 },
-          { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
-          { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 30.00 },
-          { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90, marketPrice: 28.00 },
-          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 5.50, marketPrice: 16.50 },
-          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 11.90, marketPrice: 40.00 },
-          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 30.00 },
-          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 60.00 },
-          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 40.00 },
-          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95, marketPrice: 50.00 },
-          { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95, marketPrice: 75.00 },
-          { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 35.00 },
-          { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 44.00 },
-          { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 70.00 },
+          { id: 'plancha_facil', name: 'Plancha Fácil', qty: 0.0, unit: 'L', step: 0.25, costPrice: 13.50 + 6.03, marketPrice: 38.00 },
+          { id: 'desmugrante', name: 'Desmugrante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 60.00 },
+          { id: 'fabuloso', name: 'Fabuloso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90 + 6.03, marketPrice: 30.00 },
+          { id: 'pino', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.90 + 6.03, marketPrice: 28.00 },
+          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 5.50 + 6.03, marketPrice: 16.50 },
+          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 11.90 + 6.03, marketPrice: 40.00 },
+          { id: 'multilimpiador', name: 'Multilimpiador Fab', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 30.00 },
+          { id: 'jabon_multiusos', name: 'Jabón líquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 60.00 },
+          { id: 'shampoo_manos', name: 'Shampoo para Manos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 40.00 },
+          { id: 'shampoo_trastes', name: 'Shampoo Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 32.95 + 6.03, marketPrice: 50.00 },
+          { id: 'shampoo_perro', name: 'Shampoo Perro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.95 + 6.03, marketPrice: 75.00 },
+          { id: 'suavitel', name: 'Suavitel azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 35.00 },
+          { id: 'vel_rosita', name: 'Vel Rosita', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 44.00 },
+          { id: 'vanish', name: 'Vanish', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 70.00 },
           { id: 'zote', name: 'Barra Zote (400g)', qty: 0.0, unit: 'pieza', step: 1.0, costPrice: 25.00, marketPrice: 29.00 },
-          { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
-          { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 },
-          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95, marketPrice: 42.00 }
+          { id: 'mas_color', name: 'Más Color', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 },
+          { id: 'mas_negro', name: 'Más Negro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 },
+          { id: 'mas_blanco', name: 'Más Blanco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.95 + 6.03, marketPrice: 42.00 }
         ],
 
         init() {
@@ -281,3 +426,5 @@
   </script>
 </body>
 </html>
+
+          
