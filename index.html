@@ -45,21 +45,18 @@
     <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6">
 
-        <!-- Hero Section / Oferta de Membresía -->
+        <!-- Hero Section -->
         <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl text-white p-6 md:p-8 mb-8 relative overflow-hidden">
             <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8 pointer-events-none">
                 <span class="text-9xl">💧</span>
             </div>
             <div class="relative z-10 max-w-2xl">
                 <span class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ahorra hasta un 50%</span>
-                <h1 class="text-2xl md:text-4xl font-bold mt-3 mb-2">Membresía Familiar & Surtido Inteligente</h1>
+                <h1 class="text-2xl md:text-4xl font-bold mt-3 mb-2">Surtido Inteligente de Limpieza</h1>
                 <p class="text-blue-100 text-sm md:text-base mb-4 leading-relaxed">
-                    Arma tu paquete de limpieza a medida eligiendo tus litros y presentaciones favoritas. ¡Calidad superior al mejor precio directo en tu hogar!
+                    Arma tu pedido eligiendo tus litros y presentaciones favoritas. ¡Calidad superior al mejor precio directo en tu hogar!
                 </p>
                 <div class="flex flex-wrap items-center gap-4">
-                    <button @click="loadMembresiaFamiliar()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center">
-                        ✨ Cargar Paquete Membresía Familiar
-                    </button>
                     <button @click="clearCart()" class="bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition border border-white/20">
                         🗑️ Vaciar Selección
                     </button>
@@ -108,7 +105,7 @@
                     </div>
 
                     <div>
-                        <!-- Información para el cliente: solo precio del súper de referencia y su ahorro -->
+                        <!-- Información para el cliente -->
                         <div class="flex items-center justify-between mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                             <div>
                                 <span class="text-[10px] text-slate-400 block leading-none">Precio en Súper</span>
@@ -120,21 +117,32 @@
                             </div>
                         </div>
 
-                        <!-- Selector de Presentación / Cantidad -->
+                        <!-- Selector de Presentación / Cantidad diferenciado para Barra Zote vs Líquidos -->
                         <div class="space-y-2">
-                            <div class="flex items-center space-x-2">
-                                <button @click="updateCart(product, -0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
-                                <input type="number" step="0.5" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                <span class="text-xs font-medium text-slate-500" x-text="product.unit"></span>
-                                <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
-                            </div>
-                            
-                            <!-- Botones rápidos -->
-                            <div class="flex gap-1.5 pt-1">
-                                <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
-                                <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
-                                <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
-                            </div>
+                            <template x-if="product.unit === 'barra'">
+                                <div class="flex items-center space-x-2">
+                                    <button @click="updateCart(product, -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
+                                    <input type="number" step="1" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <span class="text-xs font-medium text-slate-500">barras</span>
+                                    <button @click="updateCart(product, 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
+                                </div>
+                            </template>
+                            <template x-if="product.unit !== 'barra'">
+                                <div class="space-y-2">
+                                    <div class="flex items-center space-x-2">
+                                        <button @click="updateCart(product, -0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
+                                        <input type="number" step="0.5" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                        <span class="text-xs font-medium text-slate-500" x-text="product.unit"></span>
+                                        <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
+                                    </div>
+                                    <!-- Botones rápidos -->
+                                    <div class="flex gap-1.5 pt-1">
+                                        <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
+                                        <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
+                                        <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
+                                    </div>
+                                </div>
+                            </template>
 
                             <!-- Botón individual de quitar -->
                             <button @click="cart[product.id] = 0" x-show="cart[product.id] > 0" class="w-full mt-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-1.5 rounded-lg transition border border-rose-200 flex items-center justify-center space-x-1">
@@ -180,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- ACORDEÓN DE DATOS DE ENVÍO (Ocultable para no ocupar pantalla) -->
+            <!-- ACORDEÓN DE DATOS DE ENVÍO (Ocultable) -->
             <div class="mb-2 bg-blue-50/70 border border-blue-100 rounded-xl overflow-hidden">
                 <button @click="showAddressForm = !showAddressForm" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-blue-900 bg-blue-100/60 hover:bg-blue-100 transition">
                     <div class="flex items-center space-x-2">
@@ -360,45 +368,28 @@
 
                 orders: [],
 
-                categories: ['ropa', 'limpieza', 'cremas', 'shampoo', 'auto', 'aromatizantes', 'desengrasantes'],
+                categories: ['ropa', 'limpieza', 'shampoo', 'otros'],
 
                 products: [
-                    // Categoría Ropa
-                    { id: 1, name: 'Suavitel', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
-                    { id: 2, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 48, unit: 'L', badge: 'Top' },
-                    { id: 3, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
-                    { id: 4, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
-                    { id: 5, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
-                    { id: 6, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
-                    { id: 7, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
-                    { id: 8, name: 'Jabón Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
-
-                    // Categoría Limpieza
-                    { id: 9, name: 'Fabuloso', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
-                    { id: 10, name: 'Pino Verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
-                    { id: 11, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 10.00, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
-                    { id: 12, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
-                    { id: 13, name: 'Multilimpiador', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
-                    { id: 14, name: 'Jabón multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
-                    { id: 15, name: 'Shampoo para Trastes', category: 'limpieza', description: 'Arrancagrasa concentrado cocina', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Trastes' },
-
-                    // Categoría Cremas
-                    { id: 16, name: 'Crema Sólida Nutritiva', category: 'cremas', description: 'Crema sólida humectante corporal', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 60, unit: 'pieza', badge: 'Sólida' },
-                    { id: 17, name: 'Crema Líquida Corporal', category: 'cremas', description: 'Hidratación profunda para piel seca', baseCost: 22.00, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Líquida' },
-
-                    // Categoría Shampoo
-                    { id: 18, name: 'Shampoo de Manos Aroma', category: 'shampoo', description: 'Suave con tus manos, agradable aroma', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 19, name: 'Shampoo Capilar Herbal', category: 'shampoo', description: 'Fortalecimiento y brillo capilar', baseCost: 20.00, bottleCost: 10.00, supermarketPrice: 58, unit: 'L', badge: 'Cabello' },
-                    { id: 20, name: 'Shampoo para Perro', category: 'shampoo', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
-
-                    // Categoría Auto
-                    { id: 21, name: 'Shampoo para Auto', category: 'auto', description: 'Jabón especializado carrocería con cera', baseCost: 18.50, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Auto' },
-
-                    // Categoría Aromatizantes
-                    { id: 22, name: 'Aromatizante Ambiental', category: 'aromatizantes', description: 'Esencia duradera para espacios y hogar', baseCost: 16.00, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Aroma' },
-
-                    // Categoría Desengrasantes
-                    { id: 23, name: 'Desengrasante Industrial', category: 'desengrasantes', description: 'Removedor de grasa pesada en motores y cocinas', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
+                    // Primera lista exacta solicitada
+                    { id: 1, name: 'Barra Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
+                    { id: 2, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
+                    { id: 3, name: 'Desmugrante', category: 'limpieza', description: 'Elimina mugre y grasa difícil', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Potente' },
+                    { id: 4, name: 'Fabuloso', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
+                    { id: 5, name: 'Pino Verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
+                    { id: 6, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 10.00, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
+                    { id: 7, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
+                    { id: 8, name: 'Multilimpiador Fab', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
+                    { id: 9, name: 'Jabón líquido Multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
+                    { id: 10, name: 'Shampoo para Manos', category: 'shampoo', description: 'Suave con tus manos, agradable aroma', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
+                    { id: 11, name: 'Shampoo Lavatrastes', category: 'limpieza', description: 'Arrancagrasa concentrado cocina', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Trastes' },
+                    { id: 12, name: 'Shampoo Perro', category: 'shampoo', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
+                    { id: 13, name: 'Suavitel azul', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
+                    { id: 14, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 48, unit: 'L', badge: 'Top' },
+                    { id: 15, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
+                    { id: 16, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
+                    { id: 17, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
+                    { id: 18, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Básico' }
                 ],
 
                 cart: {},
@@ -429,30 +420,6 @@
                     if (this.cart[id] < 0 || isNaN(this.cart[id])) {
                         this.cart[id] = 0;
                     }
-                },
-
-                loadMembresiaFamiliar() {
-                    const packageMap = {
-                        "Shampoo de Manos Aroma": 2,
-                        "Shampoo para Trastes": 2,
-                        "Suavitel": 3,
-                        "Vel Rosita": 1,
-                        "Vanish": 2,
-                        "Plancha Fácil": 1,
-                        "Más Color": 1,
-                        "Fabuloso": 2.5,
-                        "Cloro": 3,
-                        "Desengrasante Industrial": 1,
-                        "Jabón Zote": 1
-                    };
-
-                    this.products.forEach(p => {
-                        if (packageMap[p.name] !== undefined) {
-                            this.cart[p.id] = packageMap[p.name];
-                        } else {
-                            this.cart[p.id] = 0;
-                        }
-                    });
                 },
 
                 clearCart() {
