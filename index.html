@@ -14,7 +14,7 @@
         body { font-family: 'Poppins', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-44 md:pb-36" x-data="cleanBoxApp()">
+<body class="bg-slate-50 text-slate-800 antialiased pb-32" x-data="cleanBoxApp()">
 
     <!-- Header / Navbar -->
     <header class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
@@ -108,10 +108,16 @@
                     </div>
 
                     <div>
-                        <!-- Indicador de precio de súper sin mostrar el precio de venta unitario -->
+                        <!-- Información para el cliente: solo precio del súper de referencia y su ahorro -->
                         <div class="flex items-center justify-between mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <span class="text-xs text-slate-500 font-medium">Cotizado c/envase ($10)</span>
-                            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md" x-text="'Súper: $' + product.supermarketPrice"></span>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block leading-none">Precio en Súper</span>
+                                <span class="text-xs text-slate-600 line-through font-semibold" x-text="'$' + product.supermarketPrice"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-emerald-600 font-bold block leading-none">Tu Ahorro</span>
+                                <span class="text-xs font-bold text-emerald-600" x-text="cart[product.id] > 0 ? '$' + ((product.supermarketPrice - calculatePrice(product)) * cart[product.id]).toFixed(2) : 'Ahorra más'"></span>
+                            </div>
                         </div>
 
                         <!-- Selector de Presentación / Cantidad -->
@@ -123,14 +129,14 @@
                                 <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
                             </div>
                             
-                            <!-- Botones rápidos de cantidad -->
+                            <!-- Botones rápidos -->
                             <div class="flex gap-1.5 pt-1">
                                 <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
                                 <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
                                 <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
                             </div>
 
-                            <!-- Botón individual de eliminar debajo de las cantidades -->
+                            <!-- Botón individual de quitar -->
                             <button @click="cart[product.id] = 0" x-show="cart[product.id] > 0" class="w-full mt-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-1.5 rounded-lg transition border border-rose-200 flex items-center justify-center space-x-1">
                                 <span>🗑️ Quitar de mi lista</span>
                             </button>
@@ -142,62 +148,71 @@
 
     </main>
 
-    <!-- FLOATING CART / CHECKOUT BAR CON LISTA ACUMULADA -->
+    <!-- FLOATING CART / CHECKOUT BAR -->
     <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3">
             
-            <!-- Lista Acumulada de Productos Seleccionados -->
-            <div class="mb-3 bg-slate-50 border border-slate-200 rounded-xl p-2.5 max-h-32 overflow-y-auto">
-                <div class="flex justify-between items-center mb-1 border-b border-slate-200 pb-1">
-                    <span class="text-xs font-bold text-slate-700">📋 Productos seleccionados en tu lista:</span>
-                    <span class="text-xs text-blue-600 font-semibold" x-text="activeItemsCount + ' artículos'"></span>
-                </div>
-                <template x-if="activeItemsCount === 0">
-                    <p class="text-xs text-slate-400 italic py-1 text-center">Aún no has agregado productos a tu lista.</p>
-                </template>
-                <div class="flex flex-wrap gap-1.5 mt-1">
-                    <template x-for="product in products" :key="'list-' + product.id">
-                        <template x-if="cart[product.id] > 0">
-                            <div class="inline-flex items-center bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs shadow-xs space-x-2">
-                                <span class="font-medium text-slate-800" x-text="product.name + ' (' + cart[product.id] + ' ' + product.unit + ')'"></span>
-                                <span class="text-blue-600 font-bold" x-text="'$' + (calculatePrice(product) * cart[product.id]).toFixed(2)"></span>
-                                <button @click="cart[product.id] = 0" class="text-rose-500 hover:text-rose-700 font-bold ml-1">×</button>
-                            </div>
-                        </template>
+            <!-- ACORDEÓN DE LISTA DE PRODUCTOS SELECCIONADOS -->
+            <div class="mb-2 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+                <button @click="showSelectedList = !showSelectedList" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
+                    <div class="flex items-center space-x-2">
+                        <span>📋 Ver lista de productos seleccionados</span>
+                        <span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]" x-text="activeItemsCount"></span>
+                    </div>
+                    <span class="text-sm font-bold" x-text="showSelectedList ? '▲ Ocultar' : '▼ Mostrar'"></span>
+                </button>
+                
+                <div x-show="showSelectedList" class="p-2.5 max-h-28 overflow-y-auto space-y-1.5" x-cloak>
+                    <template x-if="activeItemsCount === 0">
+                        <p class="text-xs text-slate-400 italic text-center py-1">Aún no has agregado productos a tu lista.</p>
                     </template>
+                    <div class="flex flex-wrap gap-1.5">
+                        <template x-for="product in products" :key="'chip-' + product.id">
+                            <template x-if="cart[product.id] > 0">
+                                <div class="inline-flex items-center bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs shadow-xs space-x-2">
+                                    <span class="font-medium text-slate-800" x-text="product.name + ' (' + cart[product.id] + ' ' + product.unit + ')'"></span>
+                                    <span class="text-blue-600 font-bold" x-text="'$' + (calculatePrice(product) * cart[product.id]).toFixed(2)"></span>
+                                    <button @click="cart[product.id] = 0" class="text-rose-500 hover:text-rose-700 font-bold ml-1">×</button>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
                 </div>
             </div>
 
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- ACORDEÓN DE DATOS DE ENVÍO (Ocultable para no ocupar pantalla) -->
+            <div class="mb-2 bg-blue-50/70 border border-blue-100 rounded-xl overflow-hidden">
+                <button @click="showAddressForm = !showAddressForm" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-blue-900 bg-blue-100/60 hover:bg-blue-100 transition">
+                    <div class="flex items-center space-x-2">
+                        <span>📍 Dirección de Entrega (Nombre, Colonia y Calle)</span>
+                        <span class="text-[10px] text-blue-600 font-normal" x-text="customer.name ? '✓ Ingresados' : '(Opcional/Ocultar)'"></span>
+                    </div>
+                    <span class="text-sm font-bold" x-text="showAddressForm ? '▲ Ocultar' : '▼ Rellenar Datos'"></span>
+                </button>
+
+                <div x-show="showAddressForm" class="p-2.5 grid grid-cols-1 sm:grid-cols-3 gap-2" x-cloak>
+                    <input type="text" x-model="customer.name" placeholder="Tu Nombre *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" x-model="customer.colonia" placeholder="Colonia *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <input type="text" x-model="customer.calle" placeholder="Calle y Núm *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
                 
-                <!-- Resumen de Totales y Nota de Envío Gratis -->
-                <div class="flex items-center space-x-6 w-full md:w-auto justify-between md:justify-start">
-                    <div>
-                        <span class="text-xs text-slate-500 block">Total a Pagar</span>
-                        <div class="flex items-baseline space-x-2">
-                            <span class="text-2xl font-bold text-blue-600" x-text="'$' + totalSaleAmount.toFixed(2)"></span>
-                            <span class="text-xs text-emerald-600 font-semibold" x-text="'Ahorro: $' + totalSavings.toFixed(2)"></span>
-                        </div>
-                    </div>
-                    <div class="border-l border-slate-200 pl-4">
-                        <span class="text-[11px] font-semibold text-blue-700 block" x-text="totalSaleAmount >= 700 ? '🚚 ¡Envío Gratis Aplicado!' : '🚚 Faltan $' + (700 - totalSaleAmount).toFixed(2) + ' para envío gratis'"></span>
-                        <span class="text-[10px] text-slate-400">En compras mayores a $700</span>
+                <!-- Resumen de Totales -->
+                <div>
+                    <span class="text-xs text-slate-500 block">Total a Pagar</span>
+                    <div class="flex items-baseline space-x-2">
+                        <span class="text-2xl font-bold text-blue-600" x-text="'$' + totalSaleAmount.toFixed(2)"></span>
+                        <span class="text-xs text-emerald-600 font-semibold" x-text="'Ahorro: $' + totalSavings.toFixed(2)"></span>
                     </div>
                 </div>
 
-                <!-- Datos de Envío Obligatorios + Botón WhatsApp -->
-                <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
-                    <div class="grid grid-cols-2 sm:flex gap-2 w-full md:w-auto">
-                        <input type="text" x-model="customer.name" placeholder="Nombre (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <input type="text" x-model="customer.colonia" placeholder="Colonia (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <input type="text" x-model="customer.calle" placeholder="Calle y Núm (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-1">
-                    </div>
-
-                    <button @click="sendWhatsAppOrder()" 
-                        class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center justify-center space-x-2 whitespace-nowrap">
-                        <span>💬 Pedir por WhatsApp</span>
-                    </button>
-                </div>
+                <!-- Botón WhatsApp -->
+                <button @click="sendWhatsAppOrder()" 
+                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center space-x-2 whitespace-nowrap">
+                    <span>💬 Pedir por WhatsApp</span>
+                </button>
 
             </div>
         </div>
@@ -235,7 +250,7 @@
                         <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
                             <div>
                                 <h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo</h4>
-                                <p class="text-xs text-blue-700">Cada envase se está cotizando automáticamente en $10.00.</p>
+                                <p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p>
                             </div>
                             <div class="text-2xl font-bold text-blue-600" x-text="(targetMargin * 100).toFixed(0) + '%'"></div>
                         </div>
@@ -245,7 +260,7 @@
                             <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" class="w-full accent-blue-600">
                         </div>
 
-                        <!-- Tabla de Auditoría de Costos y Envases ($10) -->
+                        <!-- Tabla de Auditoría de Costos -->
                         <div class="overflow-x-auto border border-slate-200 rounded-xl">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
@@ -274,7 +289,7 @@
                         </div>
                     </div>
 
-                    <!-- Pestaña 2: Historial de Pedidos, Margen y Dirección -->
+                    <!-- Pestaña 2: Historial de Pedidos -->
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos Realizados</h4>
@@ -334,6 +349,8 @@
                 ownerTab: 'margen',
                 searchQuery: '',
                 selectedCategory: 'todos',
+                showSelectedList: false,
+                showAddressForm: false,
                 
                 customer: {
                     name: '',
@@ -387,7 +404,6 @@
                 cart: {},
 
                 init() {
-                    // Inicializar carrito completamente en ceros
                     this.products.forEach(p => {
                         this.cart[p.id] = 0;
                     });
@@ -492,7 +508,7 @@
                         return;
                     }
                     if (!this.customer.name || !this.customer.colonia || !this.customer.calle) {
-                        alert('Por favor completa los campos obligatorios de entrega: Nombre, Colonia y Calle.');
+                        alert('Por favor completa los campos de entrega: Nombre, Colonia y Calle.');
                         return;
                     }
 
@@ -531,7 +547,7 @@
                     }
                     message += `\n¡Quedo a la espera de la confirmación de entrega!`;
 
-                    // Guardar en Historial del Dueño (con margen, ganancia y dirección completa)
+                    // Guardar en Historial del Dueño
                     let profit = this.totalSaleAmount - totalCogs;
                     this.orders.unshift({
                         date: new Date().toLocaleString(),
@@ -551,4 +567,3 @@
     </script>
 </body>
 </html>
-
