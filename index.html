@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -61,4 +61,470 @@
     <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
       <div class="flex items-center gap-3">
         <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
-          <i data
+          <i data-lucide="calculator" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="text-lg font-bold">Panel Privado de Costos y Rentabilidad</h2>
+          <p class="text-xs text-slate-400">Control estricto de ganancias (Insumos + Envases)</p>
+        </div>
+      </div>
+      <button @click="showAdmin = false" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cerrar Panel</button>
+    </div>
+
+    <!-- TARJETAS DE RENTABILIDAD EXCLUSIVAS DEL DUEÑO -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Costo Total (Insumos + Envases)</span>
+        <span class="text-2xl font-extrabold text-rose-400" x-text="formatCurrency(calculateTotals().totalCost)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Precio Venta al Cliente</span>
+        <span class="text-2xl font-extrabold text-emerald-400" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+      </div>
+      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
+        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta Real</span>
+        <span class="text-2xl font-extrabold text-amber-400" x-text="formatCurrency(calculateTotals().profit)"></span>
+      </div>
+    </div>
+
+    <!-- Ajuste de Margen Deseado -->
+    <div class="bg-slate-800 p-4 rounded-xl mb-6">
+      <div class="flex justify-between items-center mb-2">
+        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Porcentual Objetivo:</label>
+        <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
+      </div>
+      <input type="range" min="25" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
+      <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+        <span>25% (Competitivo)</span>
+        <span>35% (Recomendado con envases)</span>
+        <span>60% (Alto margen)</span>
+      </div>
+    </div>
+
+    <!-- Tabla Interna de Costos y Utilidades del Carrito Actual -->
+    <div class="overflow-x-auto rounded-lg border border-slate-800">
+      <table class="w-full text-xs text-left">
+        <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
+          <tr>
+            <th class="p-3">Producto</th>
+            <th class="p-3 text-center">Cantidad</th>
+            <th class="p-3 text-right">Costo Unit. (Insumo + Envase)</th>
+            <th class="p-3 text-right">Subtotal Costo</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <template x-for="item in products" :key="item.id">
+            <tr x-show="item.qty > 0" class="hover:bg-slate-800/40">
+              <td class="p-3 font-medium" x-text="item.name"></td>
+              <td class="p-3 text-center" x-text="formatQty(item.qty, item.unit)"></td>
+              <td class="p-3 text-right text-slate-400" x-text="formatCurrency(item.costPrice)"></td>
+              <td class="p-3 text-right font-semibold text-rose-300" x-text="formatCurrency(item.costPrice * item.qty)"></td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- VISTA DEL CLIENTE -->
+  <main class="max-w-4xl mx-auto px-4 py-6" x-show="!showAdmin">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h2 class="text-xl font-bold text-slate-900">Arma tu Paquete Personalizado</h2>
+        <p class="text-xs text-slate-500">Selecciona las cantidades necesarias para el aseo de tu hogar</p>
+      </div>
+      <button @click="resetCart()" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition">
+        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+        <span>Limpiar Todo</span>
+      </button>
+    </div>
+
+    <!-- Resumen de productos acumulados -->
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
+      <div class="flex justify-between items-center cursor-pointer" @click="showSummaryList = !showSummaryList">
+        <div class="flex items-center gap-2">
+          <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
+          <h3 class="font-bold text-sm text-slate-800">Tu Lista Acumulada (<span x-text="getActiveProducts().length"></span> productos)</h3>
+        </div>
+        <button class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+          <span x-text="showSummaryList ? 'Ocultar lista' : 'Ver lista completa'"></span>
+          <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="showSummaryList ? 'rotate-180' : ''"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 pt-3 border-t border-slate-100" x-show="showSummaryList" x-transition>
+        <template x-if="getActiveProducts().length === 0">
+          <p class="text-xs text-slate-400 text-center py-2">Aún no has agregado productos a tu membresía. Selecciona abajo lo que necesites.</p>
+        </template>
+        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+          <template x-for="item in getActiveProducts()" :key="item.id">
+            <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 text-xs">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-700" x-text="item.name"></span>
+                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold" x-text="formatQty(item.qty, item.unit)"></span>
+              </div>
+              <button @click="setQty(item, 0)" class="text-rose-500 hover:text-rose-700 p-1 flex items-center gap-1 font-medium transition">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                <span>Eliminar</span>
+              </button>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista de Productos -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+      <template x-for="product in products" :key="product.id">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+          <div class="flex justify-between items-start mb-3">
+            <div>
+              <h3 class="font-bold text-slate-800 text-sm" x-text="product.name"></h3>
+              <span class="text-[11px] text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1">Incluido en Membresía</span>
+            </div>
+            <div class="text-right">
+              <span class="text-xs text-slate-400 font-medium block">Cantidad</span>
+              <span class="text-sm font-bold text-slate-700" x-text="formatQty(product.qty, product.unit)"></span>
+            </div>
+          </div>
+
+          <!-- Botones de Selección Rápida (250ml y 500ml exclusivamente antes del litro) -->
+          <template x-if="product.unit === 'L'">
+            <div class="flex gap-1.5 mb-3">
+              <button @click="setQty(product, 0.25)" :class="product.qty === 0.25 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">250 ml</button>
+              <button @click="setQty(product, 0.5)" :class="product.qty === 0.5 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">500 ml</button>
+              <button @click="setQty(product, 1.0)" :class="product.qty === 1.0 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">1 L</button>
+            </div>
+          </template>
+
+          <!-- Control de Incremento y Botón de Eliminar Abajo -->
+          <div class="flex flex-col gap-2">
+            <div class="flex items-center justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+              <button @click="decreaseQty(product)" class="w-8 h-8 rounded-md bg-white text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-lg hover:bg-slate-100 active:scale-95 transition shadow-sm">-</button>
+              <span class="text-sm font-bold text-slate-800" x-text="formatQty(product.qty, product.unit)"></span>
+              <button @click="increaseQty(product)" class="w-8 h-8 rounded-md bg-emerald-700 text-white flex items-center justify-center font-bold text-lg hover:bg-emerald-800 active:scale-95 transition shadow-sm">+</button>
+            </div>
+
+            <!-- Botón de eliminar debajo de las cantidades -->
+            <button x-show="product.qty > 0" @click="setQty(product, 0)" class="text-rose-500 hover:text-rose-700 text-xs font-semibold py-1 px-2 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-50 flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Quitar de mi lista</span>
+            </button>
+          </div>
+        </div>
+      </template>
+    </div>
+  </main>
+
+  <!-- BARRA INFERIOR FLOTANTE DE TOTALES, DIRECCIÓN (OPCIONAL) Y WHATSAPP -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-4 z-40" x-show="!showAdmin">
+    <div class="max-w-4xl mx-auto flex flex-col gap-3">
+      
+      <!-- Acordeón / Desplegable de Datos de Envío (Opcional) -->
+      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+        <button @click="showAddressForm = !showAddressForm" class="w-full flex items-center justify-between text-xs font-semibold text-slate-700">
+          <div class="flex items-center gap-1.5">
+            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
+            <span>Datos de Entrega (Opcional)</span>
+          </div>
+          <span class="text-[11px] text-emerald-600 flex items-center gap-1">
+            <span x-text="showAddressForm ? 'Ocultar campos' : 'Agregar dirección'"></span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" :class="showAddressForm ? 'rotate-180' : ''"></i>
+          </span>
+        </button>
+
+        <!-- Campos de dirección -->
+        <div x-show="showAddressForm" x-transition class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pt-2 border-t border-slate-200">
+          <input type="text" x-model="shipping.name" placeholder="Tu Nombre completo" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.cp" placeholder="Código Postal (C.P.)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.colonia" placeholder="Colonia" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+          <input type="text" x-model="shipping.street" placeholder="Calle y Número" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500 md:col-span-2">
+          <input type="text" x-model="shipping.extra" placeholder="Apto / Suite / Edificio (opcional)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+        </div>
+      </div>
+
+      <!-- Fila Inferior con Totales y Botón Pedir -->
+      <div class="flex items-center justify-between gap-4">
+        <div>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xs text-slate-500 font-medium">Precio Membresía:</span>
+            <span class="text-2xl font-black text-emerald-700" x-text="formatCurrency(calculateTotals().salePrice)"></span>
+          </div>
+          <div class="flex items-center gap-1 text-[11px] text-slate-500">
+            <span>Súper tradicional: <span class="line-through" x-text="formatCurrency(calculateTotals().marketPrice)"></span></span>
+            <span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="'¡Ahorras ' + formatCurrency(calculateTotals().savings) + '!'"></span>
+          </div>
+        </div>
+
+        <button @click="sendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95 shrink-0">
+          <i data-lucide="message-circle" class="w-5 h-5"></i>
+          <span class="text-sm">Pedir Membresía</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function cleanBoxApp() {
+      return {
+        showAdmin: false,
+        showSummaryList: true,
+        showAddressForm: false,
+        targetMargin: 35,
+
+        adminPin: 'niko10emma17',
+
+        shipping: {
+          name: '',
+          cp: '',
+          colonia: '',
+          street: '',
+          extra: ''
+        },
+
+        products: [
+          // Cremas Sólidas[span_1](start_span)[span_1](end_span)
+          { id: 'crema_nivea', name: 'Crema T/Nívea', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_pons', name: 'Crema T/Pons', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_bebe', name: 'Crema Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_rosas', name: 'Crema Rosas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_teatrical', name: 'Crema T/Teatrical', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_vit_e', name: 'Crema Vitamina E', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_sabila', name: 'Crema Sábila', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'cold_cream', name: 'Cold Cream', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_leche_burra', name: 'Crema Leche de Burra', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_germen_trigo', name: 'Crema Germen de trigo', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_algas', name: 'Crema Algas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_durazno', name: 'Crema Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_fresa', name: 'Crema Fresa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_manzana', name: 'Crema Manzana', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_3_caritas', name: 'Crema T/Las 3 Caritas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_tortuga', name: 'Crema de Tortuga', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_colageno', name: 'Crema de Colágeno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_concha_nacar', name: 'Crema Concha Nácar', qty: 0.0, unit: 'L', step: 0.25, costPrice: 133.00 + 6.03, marketPrice: 180.00 },
+          { id: 'crema_miel', name: 'Crema de Miel de Abeja', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
+          { id: 'crema_fuller', name: 'Crema T/Fuller', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_dove', name: 'Crema T/Dove', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_lubriderm', name: 'Crema T/Lubriderm', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_yogurt', name: 'Crema de Yogurt', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_manzanilla', name: 'Crema de Manzanilla', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_coco', name: 'Crema de Coco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+
+          // Cremas Líquidas[span_2](start_span)[span_2](end_span)
+          { id: 'crema_nivea_liq', name: 'Crema T/nívea Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_pons_liq', name: 'Crema T/Pons Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_haids', name: 'Crema T/Haids', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_almendras_liq', name: 'Crema Almendras Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_aloe_vera', name: 'Crema Aloe Vera', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_lubriderm_liq', name: 'Crema Lubriderm', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+          { id: 'crema_diabetex', name: 'Crema Diabetex', qty: 0.0, unit: 'L', step: 0.25, costPrice: 92.00 + 6.03, marketPrice: 135.00 },
+          { id: 'crema_especial', name: 'Crema Especial', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+
+          // Shampoos de Manos[span_3](start_span)[span_3](end_span)
+          { id: 'sh_manzana', name: 'SH A/Manzana', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_coco', name: 'SH A/Coco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_almendras', name: 'SH A/Almendras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_brisa', name: 'SH A/brisa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_petalos', name: 'SH A/Petalos de rosa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_durazno', name: 'SH A/Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+          { id: 'sh_fresa', name: 'SH A/Fresa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+
+          // Otros Shampoos[span_4](start_span)[span_4](end_span)
+          { id: 'sh_lavatrastes', name: 'SH. Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 46.00 + 6.03, marketPrice: 70.00 },
+          { id: 'sh_perros', name: 'SH. P/Perros', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 75.00 },
+          { id: 'sh_piojos', name: 'SH. P/Piojos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
+          { id: 'sh_alfombras', name: 'SH. P/Alfombras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
+          { id: 'sh_body', name: 'SH. Body', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
+
+          // Sección Limpiadores[span_5](start_span)[span_5](end_span)
+          { id: 'maestro_limpio', name: 'T/Maestro Limpio', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'fab_azul', name: 'T/Fab Mar Fesco Azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'fab_lavanda', name: 'T/Fab Lavanda Morado', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'fab_bebe', name: 'T/Fab Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'fab_floral', name: 'T/Fab Floral', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'fab_manzana', name: 'T/Fab Manzana /Canela', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
+          { id: 'pino_verde', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 28.00 },
+          { id: 'pino_lechoso', name: 'Pino Lechoso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 17.50 + 6.03, marketPrice: 35.00 },
+          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.00 + 6.03, marketPrice: 16.50 },
+          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.70 + 6.03, marketPrice: 40.00 },
+          { id: 'multilimpiador', name: 'Multilimpiador Fabuloso Espeso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.50 + 6.03, marketPrice: 45.00 },
+          { id: 'limpiavidrios', name: 'Limpiavidrios', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.65 + 6.03, marketPrice: 35.00 },
+          { id: 'jabon_multiusos', name: 'Jabón Liquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 65.00 },
+
+          // Productos para Auto[span_6](start_span)[span_6](end_span)
+          { id: 'allmoroll_liq', name: 'Allmoroll Liq', qty: 0.0, unit: 'L', step: 0.25, costPrice: 84.90 + 6.03, marketPrice: 120.00 },
+          { id: 'abrillantador_llantas', name: 'Abrillantador de llantas 50', qty: 0.0, unit: 'L', step: 0.25, costPrice: 84.90 + 6.03, marketPrice: 120.00 },
+          { id: 'sh_auto_cera', name: 'SH. P/Auto C/cera', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.90 + 6.03, marketPrice: 45.00 },
+          { id: 'sh_auto', name: 'SH. P/auto', qty: 0.0, unit: 'L', step: 0.25, costPrice: 21.45 + 6.03, marketPrice: 40.00 },
+          { id: 'sh_vestiduras', name: 'SH. P/Vestiduras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 21.45 + 6.03, marketPrice: 40.00 },
+          { id: 'limpiaparabrisas', name: 'Limpiaparabrisas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.50 + 6.03, marketPrice: 35.00 },
+          { id: 'desengrasante_motor', name: 'Desengrasante P/Motor', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
+          { id: 'anticongelante', name: 'Anticongelante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 33.75 + 6.03, marketPrice: 60.00 },
+
+          // Aromatizantes[span_7](start_span)[span_7](end_span)
+          { id: 'arom_herbal', name: 'Aromatizante Herbal', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_bosques', name: 'Aromatizante Bosques', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_mar', name: 'Aromatizante Mar Fresco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_limon', name: 'Aromatizante Limon', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_vainilla', name: 'Aromatizante Vainilla', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_cereza', name: 'Aromatizante Cereza', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_durazno', name: 'Aromatizante Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_mango', name: 'Aromatizante Mango', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_lavanda', name: 'Aromatizante Lavanda', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_bebe', name: 'Aromatizante Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+          { id: 'arom_chicle', name: 'Aromatizante Chicle', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+
+          // Desengrasantes[span_8](start_span)[span_8](end_span)
+          { id: 'deseng_windex', name: 'Desengrasante T/Windex', qty: 0.0, unit: 'L', step: 0.25, costPrice: 36.90 + 6.03, marketPrice: 65.00 },
+          { id: 'deseng_rosa', name: 'Desgrasante Ultra rosa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 36.90 + 6.03, marketPrice: 65.00 },
+          { id: 'deseng_ultravioleta', name: 'Desengrasante Ultravioleta', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
+          { id: 'deseng_cesco', name: 'Desengrasante T/Cesco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
+          { id: 'ultra_deseng_aroma', name: 'Ultradesengrasante C/Aroma', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
+          { id: 'ultra_deseng_rojo', name: 'Ultradesengrasante Rojo', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 }
+        ],
+
+        init() {
+          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
+            // Sesión de administrador recordada
+          }
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        requestAdminAccess() {
+          if (this.showAdmin) {
+            this.showAdmin = false;
+            return;
+          }
+
+          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
+            this.showAdmin = true;
+            this.$nextTick(() => { lucide.createIcons(); });
+            return;
+          }
+
+          const ingreso = prompt("Introduce tu PIN de administrador:");
+          if (ingreso === this.adminPin) {
+            sessionStorage.setItem('cleanbox_admin_auth', 'true');
+            this.showAdmin = true;
+            this.$nextTick(() => { lucide.createIcons(); });
+          } else if (ingreso !== null) {
+            alert("PIN incorrecto. Acceso denegado.");
+          }
+        },
+
+        // Lógica estricta de incremento: de 0.25 en 0.25 solo antes de 1L; a partir de 1L sube de 1 en 1 Litro.
+        increaseQty(product) {
+          if (product.unit === 'pieza') {
+            product.qty = Math.round((product.qty + 1.0) * 100) / 100;
+          } else {
+            if (product.qty < 1.0) {
+              product.qty = Math.round((product.qty + 0.25) * 100) / 100;
+            } else {
+              product.qty = Math.round((product.qty + 1.0) * 100) / 100;
+            }
+          }
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        decreaseQty(product) {
+          if (product.unit === 'pieza') {
+            product.qty = Math.max(0, Math.round((product.qty - 1.0) * 100) / 100);
+          } else {
+            if (product.qty <= 1.0 && product.qty > 0) {
+              product.qty = Math.max(0, Math.round((product.qty - 0.25) * 100) / 100);
+            } else if (product.qty > 1.0) {
+              product.qty = Math.max(1.0, Math.round((product.qty - 1.0) * 100) / 100);
+            }
+          }
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        setQty(product, val) {
+          product.qty = val;
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        resetCart() {
+          this.products.forEach(p => p.qty = 0);
+          this.$nextTick(() => { lucide.createIcons(); });
+        },
+
+        getActiveProducts() {
+          return this.products.filter(p => p.qty > 0);
+        },
+
+        formatQty(qty, unit) {
+          if (unit === 'pieza') return `${qty} pieza${qty !== 1 ? 's' : ''}`;
+          if (qty < 1 && qty > 0) return `${Math.round(qty * 1000)} ml`;
+          return `${qty} L`;
+        },
+
+        formatCurrency(amount) {
+          return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+        },
+
+        calculateTotals() {
+          let totalCost = 0;
+          let marketPrice = 0;
+
+          this.products.forEach(p => {
+            totalCost += p.qty * p.costPrice;
+            marketPrice += p.qty * p.marketPrice;
+          });
+
+          const marginDecimal = this.targetMargin / 100;
+          let salePrice = totalCost > 0 ? totalCost / (1 - marginDecimal) : 0;
+          
+          if (salePrice > marketPrice && marketPrice > 0) {
+            salePrice = marketPrice * 0.85;
+          }
+
+          const profit = salePrice - totalCost;
+          const savings = Math.max(0, marketPrice - salePrice);
+
+          return { totalCost, salePrice, profit, marketPrice, savings };
+        },
+
+        sendWhatsApp() {
+          const totals = this.calculateTotals();
+          let itemsList = '';
+          
+          this.products.forEach(p => {
+            if (p.qty > 0) {
+              itemsList += `• ${p.name}: ${this.formatQty(p.qty, p.unit)}\n`;
+            }
+          });
+
+          if (!itemsList) {
+            alert('Por favor selecciona al menos un producto para armar tu membresía.');
+            return;
+          }
+
+          let addressText = '';
+          if (this.shipping.name || this.shipping.street || this.shipping.colonia || this.shipping.cp || this.shipping.extra) {
+            addressText = `\n📋 *COMPROBANTE DE DOMICILIO Y ENTREGA:*\n` +
+              (this.shipping.name ? `• Nombre: ${this.shipping.name}\n` : '') +
+              (this.shipping.street ? `• Calle y Núm: ${this.shipping.street}\n` : '') +
+              (this.shipping.extra ? `• Apto/Suite: ${this.shipping.extra}\n` : '') +
+              (this.shipping.colonia ? `• Colonia: ${this.shipping.colonia}\n` : '') +
+              (this.shipping.cp ? `• C.P.: ${this.shipping.cp}\n` : '');
+          } else {
+            addressText = `\n📋 *COMPROBANTE DE ENTREGA:*\n• Domicilio: (No especificado por el cliente)\n`;
+          }
+
+          const text = `📄 *DOCUMENTO DE PEDIDO - CLEAN BOX*\n\n` +
+            `🛒 *Lista de Productos Seleccionados:*\n${itemsList}\n` +
+            `${addressText}\n` +
+            `💰 *Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n` +
+            `✨ *Ahorro vs Súper:* ${this.formatCurrency(totals.savings)}\n\n` +
+            `¿Me podrías confirmar mi pedido y la entrega?`;
+          
+          window.open(`https://wa.me/525545256011?text=${encodeURIComponent(text)}`, '_blank');
+        }
+      }
+    }
+  </script>
+</body>
+</html>
+
