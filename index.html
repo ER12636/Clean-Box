@@ -1,530 +1,531 @@
-
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <!-- SEO Básico -->
-  <title>Clean Box - Tu Membresía de Productos de Limpieza a Domicilio</title>
-  <meta name="description" content="Arma tu paquete de limpieza a medida con Clean Box. Litros y piezas exactas de cloro, fabuloso, desmugrante y más, a precios de membresía reducidos a domicilio.">
-  <meta name="keywords" content="Clean Box, productos de limpieza a domicilio, membresia de limpieza, cloro, detergente liquido, suavitel, desmugrante, artículos de aseo para el hogar">
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph para vistas previas en WhatsApp y Redes Sociales -->
-  <meta property="og:title" content="Clean Box - Tu Membresía de Limpieza a Medida">
-  <meta property="og:description" content="Selecciona las cantidades exactas para el aseo de tu hogar y ahorra en comparación con el supermercado. ¡Pide tu membresía directo por WhatsApp!">
-  <meta property="og:type" content="website">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Alpine.js CDN -->
-  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    [x-cloak] { display: none !important; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean Box - Productos de Limpieza y Aseo a Domicilio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
 </head>
-<body class="bg-slate-50 font-sans text-slate-800 antialiased min-h-screen pb-48" x-data="cleanBoxApp()" x-cloak>
+<body class="bg-slate-50 text-slate-800 antialiased pb-32" x-data="cleanBoxApp()">
 
-  <!-- Encabezado / Navbar -->
-  <header class="bg-emerald-700 text-white shadow-lg sticky top-0 z-30">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <div class="flex items-center gap-3">
-        <div class="bg-white/20 p-2 rounded-xl backdrop-blur-md">
-          <i data-lucide="sparkles" class="w-6 h-6 text-emerald-200"></i>
-        </div>
-        <div>
-          <h1 class="text-xl font-bold tracking-tight">Clean Box</h1>
-          <p class="text-xs text-emerald-100">Arma tu Membresía de Limpieza a Medida</p>
-        </div>
-      </div>
-      <!-- Botón seguro de acceso al Panel Dueño (Solo ícono) -->
-      <button @click="requestAdminAccess()" class="bg-emerald-800/60 hover:bg-emerald-800 border border-emerald-500/30 p-2.5 rounded-lg flex items-center justify-center transition" title="Panel Dueño">
-        <i data-lucide="shield-check" class="w-5 h-5 text-emerald-200"></i>
-      </button>
-    </div>
-  </header>
-
-  <!-- Banner Informativo Cliente -->
-  <div class="bg-gradient-to-r from-emerald-600 to-teal-600 text-white py-3 px-4 shadow-inner" x-show="!showAdmin">
-    <div class="max-w-4xl mx-auto flex items-center justify-between text-xs md:text-sm">
-      <div class="flex items-center gap-2">
-        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-200"></i>
-        <span>Elige los litros o piezas exactas que necesites. ¡Paga un solo precio de membresía súper reducido frente al súper!</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- PANEL DE ADMINISTRACIÓN / DUEÑO (PRIVADO CON CONTRASEÑA) -->
-  <section x-show="showAdmin" class="max-w-4xl mx-auto p-4 md:p-6 bg-slate-900 text-slate-100 rounded-2xl my-6 shadow-2xl border border-slate-800">
-    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-6">
-      <div class="flex items-center gap-3">
-        <div class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg">
-          <i data-lucide="calculator" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="text-lg font-bold">Panel Privado de Costos y Rentabilidad</h2>
-          <p class="text-xs text-slate-400">Control estricto de ganancias (Insumos + Envases)</p>
-        </div>
-      </div>
-      <button @click="showAdmin = false" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg border border-slate-700 transition">Cerrar Panel</button>
-    </div>
-
-    <!-- TARJETAS DE RENTABILIDAD EXCLUSIVAS DEL DUEÑO -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Costo Total (Insumos + Envases)</span>
-        <span class="text-2xl font-extrabold text-rose-400" x-text="formatCurrency(calculateTotals().totalCost)"></span>
-      </div>
-      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Precio Venta al Cliente</span>
-        <span class="text-2xl font-extrabold text-emerald-400" x-text="formatCurrency(calculateTotals().salePrice)"></span>
-      </div>
-      <div class="bg-slate-800/60 p-4 rounded-xl border border-slate-700/50">
-        <span class="text-xs text-slate-400 block mb-1">Tu Ganancia Neta Real</span>
-        <span class="text-2xl font-extrabold text-amber-400" x-text="formatCurrency(calculateTotals().profit)"></span>
-      </div>
-    </div>
-
-    <!-- Ajuste de Margen Deseado -->
-    <div class="bg-slate-800 p-4 rounded-xl mb-6">
-      <div class="flex justify-between items-center mb-2">
-        <label class="text-xs font-medium text-slate-300">Margen de Ganancia Porcentual Objetivo:</label>
-        <span class="text-sm font-bold text-emerald-400" x-text="targetMargin + '%'"></span>
-      </div>
-      <input type="range" min="25" max="60" step="1" x-model="targetMargin" class="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500">
-      <div class="flex justify-between text-[10px] text-slate-400 mt-1">
-        <span>25% (Competitivo)</span>
-        <span>35% (Recomendado con envases)</span>
-        <span>60% (Alto margen)</span>
-      </div>
-    </div>
-
-    <!-- Tabla Interna de Costos y Utilidades del Carrito Actual -->
-    <div class="overflow-x-auto rounded-lg border border-slate-800">
-      <table class="w-full text-xs text-left">
-        <thead class="bg-slate-800 text-slate-400 border-b border-slate-700">
-          <tr>
-            <th class="p-3">Producto</th>
-            <th class="p-3 text-center">Cantidad</th>
-            <th class="p-3 text-right">Costo Unit. (Insumo + Envase)</th>
-            <th class="p-3 text-right">Subtotal Costo</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-800">
-          <template x-for="item in products" :key="item.id">
-            <tr x-show="item.qty > 0" class="hover:bg-slate-800/40">
-              <td class="p-3 font-medium" x-text="item.name"></td>
-              <td class="p-3 text-center" x-text="formatQty(item.qty, item.unit)"></td>
-              <td class="p-3 text-right text-slate-400" x-text="formatCurrency(item.costPrice)"></td>
-              <td class="p-3 text-right font-semibold text-rose-300" x-text="formatCurrency(item.costPrice * item.qty)"></td>
-            </tr>
-          </template>
-        </tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- VISTA DEL CLIENTE -->
-  <main class="max-w-4xl mx-auto px-4 py-6" x-show="!showAdmin">
-    <div class="flex justify-between items-center mb-6">
-      <div>
-        <h2 class="text-xl font-bold text-slate-900">Arma tu Paquete Personalizado</h2>
-        <p class="text-xs text-slate-500">Selecciona las cantidades necesarias para el aseo de tu hogar</p>
-      </div>
-      <button @click="resetCart()" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1 transition">
-        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
-        <span>Limpiar Todo</span>
-      </button>
-    </div>
-
-    <!-- Resumen de productos acumulados -->
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
-      <div class="flex justify-between items-center cursor-pointer" @click="showSummaryList = !showSummaryList">
-        <div class="flex items-center gap-2">
-          <i data-lucide="shopping-bag" class="w-5 h-5 text-emerald-600"></i>
-          <h3 class="font-bold text-sm text-slate-800">Tu Lista Acumulada (<span x-text="getActiveProducts().length"></span> productos)</h3>
-        </div>
-        <button class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-          <span x-text="showSummaryList ? 'Ocultar lista' : 'Ver lista completa'"></span>
-          <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="showSummaryList ? 'rotate-180' : ''"></i>
-        </button>
-      </div>
-
-      <div class="mt-4 pt-3 border-t border-slate-100" x-show="showSummaryList" x-transition>
-        <template x-if="getActiveProducts().length === 0">
-          <p class="text-xs text-slate-400 text-center py-2">Aún no has agregado productos a tu membresía. Selecciona abajo lo que necesites.</p>
-        </template>
-        <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
-          <template x-for="item in getActiveProducts()" :key="item.id">
-            <div class="flex justify-between items-center bg-slate-50 px-3 py-2 rounded-lg border border-slate-100 text-xs">
-              <div class="flex items-center gap-2">
-                <span class="font-semibold text-slate-700" x-text="item.name"></span>
-                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold" x-text="formatQty(item.qty, item.unit)"></span>
-              </div>
-              <button @click="setQty(item, 0)" class="text-rose-500 hover:text-rose-700 p-1 flex items-center gap-1 font-medium transition">
-                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                <span>Eliminar</span>
-              </button>
+    <!-- Header / Navbar -->
+    <header class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-bold tracking-tight">🧹 Clean Box</span>
+                <span class="hidden sm:inline-block bg-blue-700 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Calidad a Domicilio</span>
             </div>
-          </template>
+            
+            <div class="flex items-center space-x-3">
+                <!-- Anuncio de envío gratis arriba a la derecha -->
+                <div class="hidden md:flex items-center bg-blue-700 text-xs px-3 py-1.5 rounded-lg border border-blue-500 font-medium shadow-sm">
+                    <span class="mr-1.5">🚚</span>
+                    <span>Envío Gratis en compras mayores a <strong>$700</strong></span>
+                </div>
+                
+                <button @click="openOwnerModal = true" class="bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition border border-blue-500 flex items-center shadow-sm">
+                    <span class="mr-1">🔒</span> Panel Dueño
+                </button>
+            </div>
         </div>
-      </div>
-    </div>
+        <!-- Barra visible en móviles para el anuncio de envío -->
+        <div class="md:hidden bg-blue-700 text-center text-xs py-1 px-2 border-t border-blue-500 font-medium">
+            🚚 Envío Gratis en compras mayores a <strong>$700</strong>
+        </div>
+    </header>
 
-    <!-- Lista de Productos -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-      <template x-for="product in products" :key="product.id">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
-          <div class="flex justify-between items-start mb-3">
-            <div>
-              <h3 class="font-bold text-slate-800 text-sm" x-text="product.name"></h3>
-              <span class="text-[11px] text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full inline-block mt-1">Incluido en Membresía</span>
-            </div>
-            <div class="text-right">
-              <span class="text-xs text-slate-400 font-medium block">Cantidad</span>
-              <span class="text-sm font-bold text-slate-700" x-text="formatQty(product.qty, product.unit)"></span>
-            </div>
-          </div>
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
 
-          <!-- Botones de Selección Rápida (250ml y 500ml exclusivamente antes del litro) -->
-          <template x-if="product.unit === 'L'">
-            <div class="flex gap-1.5 mb-3">
-              <button @click="setQty(product, 0.25)" :class="product.qty === 0.25 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">250 ml</button>
-              <button @click="setQty(product, 0.5)" :class="product.qty === 0.5 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">500 ml</button>
-              <button @click="setQty(product, 1.0)" :class="product.qty === 1.0 ? 'bg-emerald-700 text-white border-emerald-700' : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'" class="text-[11px] font-semibold py-1 px-2 rounded-md border transition flex-1">1 L</button>
+        <!-- Hero Section / Oferta de Membresía -->
+        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl text-white p-6 md:p-8 mb-8 relative overflow-hidden">
+            <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8 pointer-events-none">
+                <span class="text-9xl">💧</span>
             </div>
-          </template>
+            <div class="relative z-10 max-w-2xl">
+                <span class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ahorra hasta un 50%</span>
+                <h1 class="text-2xl md:text-4xl font-bold mt-3 mb-2">Membresía Familiar & Surtido Inteligente</h1>
+                <p class="text-blue-100 text-sm md:text-base mb-4 leading-relaxed">
+                    Arma tu paquete de limpieza a medida eligiendo tus litros y presentaciones favoritas. ¡Calidad superior al mejor precio directo en tu hogar!
+                </p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <button @click="loadMembresiaFamiliar()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-5 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center">
+                        ✨ Cargar Paquete Membresía Familiar
+                    </button>
+                    <button @click="clearCart()" class="bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition border border-white/20">
+                        🗑️ Vaciar Selección
+                    </button>
+                </div>
+            </div>
+        </div>
 
-          <!-- Control de Incremento y Botón de Eliminar Abajo -->
-          <div class="flex flex-col gap-2">
-            <div class="flex items-center justify-between bg-slate-50 p-1.5 rounded-lg border border-slate-200">
-              <button @click="decreaseQty(product)" class="w-8 h-8 rounded-md bg-white text-slate-700 border border-slate-200 flex items-center justify-center font-bold text-lg hover:bg-slate-100 active:scale-95 transition shadow-sm">-</button>
-              <span class="text-sm font-bold text-slate-800" x-text="formatQty(product.qty, product.unit)"></span>
-              <button @click="increaseQty(product)" class="w-8 h-8 rounded-md bg-emerald-700 text-white flex items-center justify-center font-bold text-lg hover:bg-emerald-800 active:scale-95 transition shadow-sm">+</button>
+        <!-- BARRA DE BÚSQUEDA Y FILTROS DE CATEGORÍA -->
+        <div class="mb-6 space-y-4">
+            <div class="relative max-w-md mx-auto md:mx-0">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    🔍
+                </span>
+                <input type="text" x-model="searchQuery" placeholder="Buscar producto por nombre (ej. Suavitel, Cloro, Zote)..." 
+                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
             </div>
 
-            <!-- Botón de eliminar debajo de las cantidades -->
-            <button x-show="product.qty > 0" @click="setQty(product, 0)" class="text-rose-500 hover:text-rose-700 text-xs font-semibold py-1 px-2 rounded-lg border border-rose-100 bg-rose-50/50 hover:bg-rose-50 flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-              <span>Quitar de mi lista</span>
-            </button>
-          </div>
+            <!-- Categorías -->
+            <div class="flex overflow-x-auto pb-2 space-x-2 scrollbar-none">
+                <button @click="selectedCategory = 'todos'" 
+                    :class="selectedCategory === 'todos' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                    class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition">
+                    Todos los Productos
+                </button>
+                <template x-for="cat in categories" :key="cat">
+                    <button @click="selectedCategory = cat" 
+                        :class="selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
+                        class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition capitalize" 
+                        x-text="cat">
+                    </button>
+                </template>
+            </div>
         </div>
-      </template>
+
+        <!-- PRODUCT GRID -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <template x-for="product in filteredProducts" :key="product.id">
+                <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition border border-slate-200 p-4 flex flex-col justify-between relative group">
+                    <!-- Badge Categoría -->
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] font-bold uppercase px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md tracking-wider capitalize" x-text="product.category"></span>
+                            <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full" x-text="product.badge"></span>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1" x-text="product.name"></h3>
+                        <p class="text-xs text-slate-500 mb-3" x-text="product.description"></p>
+                    </div>
+
+                    <div>
+                        <div class="flex items-baseline justify-between mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <div>
+                                <span class="text-[11px] text-slate-400 block leading-none">Precio venta</span>
+                                <span class="text-lg font-bold text-blue-600" x-text="'$' + calculatePrice(product).toFixed(2)"></span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 block leading-none">Súper Aprox.</span>
+                                <span class="text-xs text-slate-400 line-through" x-text="'$' + product.supermarketPrice"></span>
+                            </div>
+                        </div>
+
+                        <!-- Selector de Presentación / Cantidad -->
+                        <div class="space-y-2">
+                            <div class="flex items-center space-x-2">
+                                <button @click="updateCart(product, -0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
+                                <input type="number" step="0.5" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <span class="text-xs font-medium text-slate-500" x-text="product.unit"></span>
+                                <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
+                            </div>
+                            
+                            <!-- Botones rápidos -->
+                            <div class="flex gap-1.5 pt-1">
+                                <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
+                                <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
+                                <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+    </main>
+
+    <!-- FLOATING CART / CHECKOUT BAR -->
+    <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                
+                <!-- Resumen de Totales y Productos Seleccionados -->
+                <div class="flex items-center space-x-6 w-full md:w-auto justify-between md:justify-start">
+                    <div>
+                        <span class="text-xs text-slate-500 block">Total a Pagar</span>
+                        <div class="flex items-baseline space-x-2">
+                            <span class="text-2xl font-bold text-blue-600" x-text="'$' + totalSaleAmount.toFixed(2)"></span>
+                            <span class="text-xs text-emerald-600 font-semibold" x-text="'Ahorro: $' + totalSavings.toFixed(2)"></span>
+                        </div>
+                    </div>
+                    <div class="hidden sm:block border-l border-slate-200 pl-6">
+                        <span class="text-xs text-slate-500 block">Productos en Lista</span>
+                        <span class="text-sm font-semibold text-slate-700" x-text="activeItemsCount + ' artículos'"></span>
+                    </div>
+                </div>
+
+                <!-- Datos de Envío Breves + Botón WhatsApp -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <div class="grid grid-cols-2 sm:flex gap-2 w-full md:w-auto">
+                        <input type="text" x-model="customer.name" placeholder="Tu Nombre *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" x-model="customer.colonia" placeholder="Colonia *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" x-model="customer.calle" placeholder="Calle y Núm *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-1">
+                    </div>
+
+                    <button @click="sendWhatsAppOrder()" 
+                        class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center justify-center space-x-2 whitespace-nowrap">
+                        <span>💬 Pedir por WhatsApp</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
     </div>
-  </main>
 
-  <!-- BARRA INFERIOR FLOTANTE DE TOTALES, DIRECCIÓN (OPCIONAL) Y WHATSAPP -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 shadow-2xl p-4 z-40" x-show="!showAdmin">
-    <div class="max-w-4xl mx-auto flex flex-col gap-3">
-      
-      <!-- Acordeón / Desplegable de Datos de Envío (Opcional) -->
-      <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-        <button @click="showAddressForm = !showAddressForm" class="w-full flex items-center justify-between text-xs font-semibold text-slate-700">
-          <div class="flex items-center gap-1.5">
-            <i data-lucide="map-pin" class="w-4 h-4 text-emerald-600"></i>
-            <span>Datos de Entrega (Opcional)</span>
-          </div>
-          <span class="text-[11px] text-emerald-600 flex items-center gap-1">
-            <span x-text="showAddressForm ? 'Ocultar campos' : 'Agregar dirección'"></span>
-            <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition-transform" :class="showAddressForm ? 'rotate-180' : ''"></i>
-          </span>
-        </button>
+    <!-- OWNER MODAL (PIN PROTECTED) -->
+    <div x-show="openOwnerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-cloak>
+        <div @click.outside="openOwnerModal = false" class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
+                <h2 class="text-xl font-bold text-slate-800">🔒 Panel de Control del Dueño</h2>
+                <button @click="openOwnerModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold">✕</button>
+            </div>
 
-        <!-- Campos de dirección -->
-        <div x-show="showAddressForm" x-transition class="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3 pt-2 border-t border-slate-200">
-          <input type="text" x-model="shipping.name" placeholder="Tu Nombre completo" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
-          <input type="text" x-model="shipping.cp" placeholder="Código Postal (C.P.)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
-          <input type="text" x-model="shipping.colonia" placeholder="Colonia" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
-          <input type="text" x-model="shipping.street" placeholder="Calle y Número" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500 md:col-span-2">
-          <input type="text" x-model="shipping.extra" placeholder="Apto / Suite / Edificio (opcional)" class="text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:border-emerald-500">
+            <!-- PIN Login State -->
+            <template x-if="!ownerAuthorized">
+                <div class="py-12 text-center max-w-sm mx-auto space-y-4">
+                    <span class="text-4xl">🔐</span>
+                    <h3 class="font-bold text-slate-700">Ingresa la Contraseña de Administrador</h3>
+                    <input type="password" x-model="pinInput" @keyup.enter="authorizeOwner()" placeholder="Contraseña..." class="w-full text-center px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                    <button @click="authorizeOwner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md">Acceder al Panel</button>
+                </div>
+            </template>
+
+            <!-- Authorized Owner Content -->
+            <template x-if="ownerAuthorized">
+                <div class="space-y-6">
+                    <!-- Pestañas del Panel de Dueño -->
+                    <div class="flex space-x-2 border-b border-slate-200 pb-3">
+                        <button @click="ownerTab = 'margen'" :class="ownerTab === 'margen' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">⚙️ Margen de Ganancia</button>
+                        <button @click="ownerTab = 'historial'" :class="ownerTab === 'historial' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">📋 Historial de Pedidos</button>
+                    </div>
+
+                    <!-- Pestaña 1: Configurar Margen -->
+                    <div x-show="ownerTab === 'margen'" class="space-y-6">
+                        <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
+                            <div>
+                                <h4 class="font-bold text-blue-900 text-sm">Margen de Ganancia Actual</h4>
+                                <p class="text-xs text-blue-700">Ajusta el porcentaje para recalcular automáticamente los precios de venta de todo el catálogo.</p>
+                            </div>
+                            <div class="text-2xl font-bold text-blue-600" x-text="(targetMargin * 100).toFixed(0) + '%'"></div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-2">Desliza para cambiar margen (30% al 60%):</label>
+                            <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" class="w-full accent-blue-600">
+                        </div>
+
+                        <!-- Tabla de Auditoría de Costos y Envases -->
+                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
+                                    <tr>
+                                        <th class="p-3">Producto</th>
+                                        <th class="p-3">Costo Insumo</th>
+                                        <th class="p-3">Costo Envase</th>
+                                        <th class="p-3">Costo Total (COGS)</th>
+                                        <th class="p-3">Precio Venta</th>
+                                        <th class="p-3">Ganancia</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <template x-for="product in products" :key="product.id">
+                                        <tr class="hover:bg-slate-50">
+                                            <td class="p-3 font-semibold text-slate-800" x-text="product.name"></td>
+                                            <td class="p-3 text-slate-600" x-text="'$' + product.baseCost.toFixed(2)"></td>
+                                            <td class="p-3 text-slate-600" x-text="'$' + product.bottleCost.toFixed(2)"></td>
+                                            <td class="p-3 font-bold text-slate-700" x-text="'$' + (product.baseCost + product.bottleCost).toFixed(2)"></td>
+                                            <td class="p-3 font-bold text-blue-600" x-text="'$' + calculatePrice(product).toFixed(2)"></td>
+                                            <td class="p-3 text-emerald-600 font-semibold" x-text="'$' + (calculatePrice(product) - (product.baseCost + product.bottleCost)).toFixed(2)"></td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña 2: Historial de Pedidos -->
+                    <div x-show="ownerTab === 'historial'" class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos Realizados</h4>
+                            <button @click="orders = []" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
+                        </div>
+
+                        <template x-if="orders.length === 0">
+                            <div class="py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
+                                <p class="text-sm">Aún no hay pedidos registrados en este dispositivo.</p>
+                            </div>
+                        </template>
+
+                        <div class="space-y-4">
+                            <template x-for="(order, index) in orders" :key="index">
+                                <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <span class="text-xs font-bold text-blue-600 uppercase" x-text="'Pedido #' + (orders.length - index)"></span>
+                                            <h5 class="font-bold text-slate-800 text-sm" x-text="order.customer.name"></h5>
+                                        </div>
+                                        <span class="text-xs text-slate-400" x-text="order.date"></span>
+                                    </div>
+
+                                    <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-100">
+                                        <div><strong>Dirección:</strong> <span x-text="order.customer.calle + ', Col. ' + order.customer.colonia"></span></div>
+                                        <div><strong>Total Venta:</strong> <span class="font-bold text-blue-600" x-text="'$' + order.total.toFixed(2)"></span></div>
+                                        <div><strong>Costo Total (COGS):</strong> <span class="text-slate-600" x-text="'$' + order.cogs.toFixed(2)"></span></div>
+                                        <div><strong>Ganancia Neta:</strong> <span class="font-bold text-emerald-600" x-text="'$' + order.profit.toFixed(2) + ' (' + ((order.profit/order.total)*100).toFixed(1) + '%)'"></span></div>
+                                    </div>
+
+                                    <div class="text-xs text-slate-600">
+                                        <strong>Productos:</strong>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            <template x-for="item in order.items">
+                                                <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md" x-text="item.name + ' (' + item.qty + ' ' + item.unit + ') - $' + item.subtotal.toFixed(2)"></span>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                </div>
+            </template>
         </div>
-      </div>
-
-      <!-- Fila Inferior con Totales y Botón Pedir -->
-      <div class="flex items-center justify-between gap-4">
-        <div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-xs text-slate-500 font-medium">Precio Membresía:</span>
-            <span class="text-2xl font-black text-emerald-700" x-text="formatCurrency(calculateTotals().salePrice)"></span>
-          </div>
-          <div class="flex items-center gap-1 text-[11px] text-slate-500">
-            <span>Súper tradicional: <span class="line-through" x-text="formatCurrency(calculateTotals().marketPrice)"></span></span>
-            <span class="text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded" x-text="'¡Ahorras ' + formatCurrency(calculateTotals().savings) + '!'"></span>
-          </div>
-        </div>
-
-        <button @click="sendWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-xl shadow-lg hover:shadow-emerald-600/30 flex items-center gap-2 transition active:scale-95 shrink-0">
-          <i data-lucide="message-circle" class="w-5 h-5"></i>
-          <span class="text-sm">Pedir Membresía</span>
-        </button>
-      </div>
-
     </div>
-  </div>
 
-  <script>
-    function cleanBoxApp() {
-      return {
-        showAdmin: false,
-        showSummaryList: true,
-        showAddressForm: false,
-        targetMargin: 35,
+    <!-- ALPINE.JS LOGIC -->
+    <script>
+        function cleanBoxApp() {
+            return {
+                targetMargin: 0.40, // 40% margen inicial por defecto
+                openOwnerModal: false,
+                ownerAuthorized: false,
+                pinInput: '',
+                ownerTab: 'margen',
+                searchQuery: '',
+                selectedCategory: 'todos',
+                
+                customer: {
+                    name: '',
+                    colonia: '',
+                    calle: ''
+                },
 
-        adminPin: 'niko10emma17',
+                orders: [],
 
-        shipping: {
-          name: '',
-          cp: '',
-          colonia: '',
-          street: '',
-          extra: ''
-        },
+                categories: ['ropa', 'limpieza', 'cremas', 'shampoo', 'auto', 'aromatizantes', 'desengrasantes'],
 
-        products: [
-          // Cremas Sólidas[span_1](start_span)[span_1](end_span)
-          { id: 'crema_nivea', name: 'Crema T/Nívea', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_pons', name: 'Crema T/Pons', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_bebe', name: 'Crema Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_rosas', name: 'Crema Rosas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_teatrical', name: 'Crema T/Teatrical', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_vit_e', name: 'Crema Vitamina E', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_sabila', name: 'Crema Sábila', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'cold_cream', name: 'Cold Cream', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_leche_burra', name: 'Crema Leche de Burra', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_germen_trigo', name: 'Crema Germen de trigo', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_algas', name: 'Crema Algas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_durazno', name: 'Crema Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_fresa', name: 'Crema Fresa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_manzana', name: 'Crema Manzana', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_3_caritas', name: 'Crema T/Las 3 Caritas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_tortuga', name: 'Crema de Tortuga', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_colageno', name: 'Crema de Colágeno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_concha_nacar', name: 'Crema Concha Nácar', qty: 0.0, unit: 'L', step: 0.25, costPrice: 133.00 + 6.03, marketPrice: 180.00 },
-          { id: 'crema_miel', name: 'Crema de Miel de Abeja', qty: 0.0, unit: 'L', step: 0.25, costPrice: 89.90 + 6.03, marketPrice: 130.00 },
-          { id: 'crema_fuller', name: 'Crema T/Fuller', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_dove', name: 'Crema T/Dove', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_lubriderm', name: 'Crema T/Lubriderm', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_yogurt', name: 'Crema de Yogurt', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_manzanilla', name: 'Crema de Manzanilla', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_coco', name: 'Crema de Coco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+                products: [
+                    // Categoría Ropa
+                    { id: 1, name: 'Suavitel', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
+                    { id: 2, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 48, unit: 'L', badge: 'Top' },
+                    { id: 3, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
+                    { id: 4, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
+                    { id: 5, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
+                    { id: 6, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
+                    { id: 7, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 21.11, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
+                    { id: 8, name: 'Jabón Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
 
-          // Cremas Líquidas[span_2](start_span)[span_2](end_span)
-          { id: 'crema_nivea_liq', name: 'Crema T/nívea Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_pons_liq', name: 'Crema T/Pons Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_haids', name: 'Crema T/Haids', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_almendras_liq', name: 'Crema Almendras Liq.', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_aloe_vera', name: 'Crema Aloe Vera', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_lubriderm_liq', name: 'Crema Lubriderm', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
-          { id: 'crema_diabetex', name: 'Crema Diabetex', qty: 0.0, unit: 'L', step: 0.25, costPrice: 92.00 + 6.03, marketPrice: 135.00 },
-          { id: 'crema_especial', name: 'Crema Especial', qty: 0.0, unit: 'L', step: 0.25, costPrice: 101.00 + 6.03, marketPrice: 145.00 },
+                    // Categoría Limpieza
+                    { id: 9, name: 'Shampoo para manos', category: 'limpieza', description: 'Suave con tus manos, aroma agradable', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 35, unit: 'L', badge: 'Hogar' },
+                    { id: 10, name: 'Shampoo para trastes', category: 'limpieza', description: 'Arrancagrasa concentrado para cocina', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 55, unit: 'L', badge: 'Alta Potencia' },
+                    { id: 11, name: 'Fabuloso', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 21.11, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
+                    { id: 12, name: 'Pino Verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 21.11, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
+                    { id: 13, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 21.11, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
+                    { id: 14, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 21.11, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
+                    { id: 15, name: 'Multilimpiador', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
+                    { id: 16, name: 'Jabón multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
 
-          // Shampoos de Manos[span_3](start_span)[span_3](end_span)
-          { id: 'sh_manzana', name: 'SH A/Manzana', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_coco', name: 'SH A/Coco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_almendras', name: 'SH A/Almendras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_brisa', name: 'SH A/brisa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_petalos', name: 'SH A/Petalos de rosa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_durazno', name: 'SH A/Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
-          { id: 'sh_fresa', name: 'SH A/Fresa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.40 + 6.03, marketPrice: 50.00 },
+                    // Otras categorías con costos reales ajustados con envases
+                    { id: 17, name: 'Crema Corporal Hidratante', category: 'cremas', description: 'Nutrición profunda para piel seca', baseCost: 22.00, bottleCost: 4.34, supermarketPrice: 65, unit: 'L', badge: 'Cuidado' },
+                    { id: 18, name: 'Shampoo Capilar Herbal', category: 'shampoo', description: 'Fortalecimiento y brillo capilar', baseCost: 20.00, bottleCost: 21.11, supermarketPrice: 58, unit: 'L', badge: 'Cabello' },
+                    { id: 19, name: 'Shampoo para Auto', category: 'auto', description: 'Jabón especializado para carrocería con cera', baseCost: 18.50, bottleCost: 21.11, supermarketPrice: 55, unit: 'L', badge: 'Automotriz' },
+                    { id: 20, name: 'Aromatizante Ambiental', category: 'aromatizantes', description: 'Esencia duradera para espacios y hogar', baseCost: 16.00, bottleCost: 4.34, supermarketPrice: 45, unit: 'L', badge: 'Aroma' },
+                    { id: 21, name: 'Desengrasante Industrial', category: 'desengrasantes', description: 'Removedor de grasa pesada en motores y cocinas', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
+                ],
 
-          // Otros Shampoos[span_4](start_span)[span_4](end_span)
-          { id: 'sh_lavatrastes', name: 'SH. Lavatrastes', qty: 0.0, unit: 'L', step: 0.25, costPrice: 46.00 + 6.03, marketPrice: 70.00 },
-          { id: 'sh_perros', name: 'SH. P/Perros', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 75.00 },
-          { id: 'sh_piojos', name: 'SH. P/Piojos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
-          { id: 'sh_alfombras', name: 'SH. P/Alfombras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
-          { id: 'sh_body', name: 'SH. Body', qty: 0.0, unit: 'L', step: 0.25, costPrice: 23.70 + 6.03, marketPrice: 55.00 },
+                cart: {},
 
-          // Sección Limpiadores[span_5](start_span)[span_5](end_span)
-          { id: 'maestro_limpio', name: 'T/Maestro Limpio', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'fab_azul', name: 'T/Fab Mar Fesco Azul', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'fab_lavanda', name: 'T/Fab Lavanda Morado', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'fab_bebe', name: 'T/Fab Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'fab_floral', name: 'T/Fab Floral', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'fab_manzana', name: 'T/Fab Manzana /Canela', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 30.00 },
-          { id: 'pino_verde', name: 'Pino Verde', qty: 0.0, unit: 'L', step: 0.25, costPrice: 12.40 + 6.03, marketPrice: 28.00 },
-          { id: 'pino_lechoso', name: 'Pino Lechoso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 17.50 + 6.03, marketPrice: 35.00 },
-          { id: 'cloro', name: 'Cloro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 8.00 + 6.03, marketPrice: 16.50 },
-          { id: 'quitasarro', name: 'Quitasarro', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.70 + 6.03, marketPrice: 40.00 },
-          { id: 'multilimpiador', name: 'Multilimpiador Fabuloso Espeso', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.50 + 6.03, marketPrice: 45.00 },
-          { id: 'limpiavidrios', name: 'Limpiavidrios', qty: 0.0, unit: 'L', step: 0.25, costPrice: 16.65 + 6.03, marketPrice: 35.00 },
-          { id: 'jabon_multiusos', name: 'Jabón Liquido Multiusos', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 65.00 },
+                init() {
+                    // Inicializar carrito en 0
+                    this.products.forEach(p => {
+                        this.cart[p.id] = 0;
+                    });
+                },
 
-          // Productos para Auto[span_6](start_span)[span_6](end_span)
-          { id: 'allmoroll_liq', name: 'Allmoroll Liq', qty: 0.0, unit: 'L', step: 0.25, costPrice: 84.90 + 6.03, marketPrice: 120.00 },
-          { id: 'abrillantador_llantas', name: 'Abrillantador de llantas 50', qty: 0.0, unit: 'L', step: 0.25, costPrice: 84.90 + 6.03, marketPrice: 120.00 },
-          { id: 'sh_auto_cera', name: 'SH. P/Auto C/cera', qty: 0.0, unit: 'L', step: 0.25, costPrice: 22.90 + 6.03, marketPrice: 45.00 },
-          { id: 'sh_auto', name: 'SH. P/auto', qty: 0.0, unit: 'L', step: 0.25, costPrice: 21.45 + 6.03, marketPrice: 40.00 },
-          { id: 'sh_vestiduras', name: 'SH. P/Vestiduras', qty: 0.0, unit: 'L', step: 0.25, costPrice: 21.45 + 6.03, marketPrice: 40.00 },
-          { id: 'limpiaparabrisas', name: 'Limpiaparabrisas', qty: 0.0, unit: 'L', step: 0.25, costPrice: 15.50 + 6.03, marketPrice: 35.00 },
-          { id: 'desengrasante_motor', name: 'Desengrasante P/Motor', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
-          { id: 'anticongelante', name: 'Anticongelante', qty: 0.0, unit: 'L', step: 0.25, costPrice: 33.75 + 6.03, marketPrice: 60.00 },
+                calculatePrice(product) {
+                    let totalCost = product.baseCost + product.bottleCost;
+                    return totalCost / (1 - this.targetMargin);
+                },
 
-          // Aromatizantes[span_7](start_span)[span_7](end_span)
-          { id: 'arom_herbal', name: 'Aromatizante Herbal', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_bosques', name: 'Aromatizante Bosques', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_mar', name: 'Aromatizante Mar Fresco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_limon', name: 'Aromatizante Limon', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_vainilla', name: 'Aromatizante Vainilla', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_cereza', name: 'Aromatizante Cereza', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_durazno', name: 'Aromatizante Durazno', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_mango', name: 'Aromatizante Mango', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_lavanda', name: 'Aromatizante Lavanda', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_bebe', name: 'Aromatizante Bebe', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
-          { id: 'arom_chicle', name: 'Aromatizante Chicle', qty: 0.0, unit: 'L', step: 0.25, costPrice: 40.35 + 6.03, marketPrice: 70.00 },
+                updateCart(product, amount) {
+                    let current = this.cart[product.id] || 0;
+                    let updated = current + amount;
+                    if (updated < 0) updated = 0;
+                    this.cart[product.id] = Number(updated.toFixed(2));
+                },
 
-          // Desengrasantes[span_8](start_span)[span_8](end_span)
-          { id: 'deseng_windex', name: 'Desengrasante T/Windex', qty: 0.0, unit: 'L', step: 0.25, costPrice: 36.90 + 6.03, marketPrice: 65.00 },
-          { id: 'deseng_rosa', name: 'Desgrasante Ultra rosa', qty: 0.0, unit: 'L', step: 0.25, costPrice: 36.90 + 6.03, marketPrice: 65.00 },
-          { id: 'deseng_ultravioleta', name: 'Desengrasante Ultravioleta', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
-          { id: 'deseng_cesco', name: 'Desengrasante T/Cesco', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
-          { id: 'ultra_deseng_aroma', name: 'Ultradesengrasante C/Aroma', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 },
-          { id: 'ultra_deseng_rojo', name: 'Ultradesengrasante Rojo', qty: 0.0, unit: 'L', step: 0.25, costPrice: 42.90 + 6.03, marketPrice: 70.00 }
-        ],
+                setCartQty(product, qty) {
+                    this.cart[product.id] = qty;
+                },
 
-        init() {
-          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
-            // Sesión de administrador recordada
-          }
-          this.$nextTick(() => { lucide.createIcons(); });
-        },
+                sanitizeCart(id) {
+                    if (this.cart[id] < 0 || isNaN(this.cart[id])) {
+                        this.cart[id] = 0;
+                    }
+                },
 
-        requestAdminAccess() {
-          if (this.showAdmin) {
-            this.showAdmin = false;
-            return;
-          }
+                loadMembresiaFamiliar() {
+                    // Cargar cantidades de la membresía familiar estándar
+                    const packageMap = {
+                        "Shampoo para manos": 2,
+                        "Shampoo para trastes": 2,
+                        "Suavitel": 3,
+                        "Vel Rosita": 1,
+                        "Vanish": 2,
+                        "Plancha Fácil": 1,
+                        "Más Color": 1,
+                        "Más Negro": 0.5,
+                        "Más Blanco": 0.5,
+                        "Desengrasante Industrial": 1,
+                        "Fabuloso": 2.5,
+                        "Pino Verde": 1,
+                        "Cloro": 3,
+                        "Quitasarro": 1,
+                        "Multilimpiador": 1,
+                        "Jabón multiusos": 2,
+                        "Jabón Zote": 1
+                    };
 
-          if (sessionStorage.getItem('cleanbox_admin_auth') === 'true') {
-            this.showAdmin = true;
-            this.$nextTick(() => { lucide.createIcons(); });
-            return;
-          }
+                    this.products.forEach(p => {
+                        if (packageMap[p.name] !== undefined) {
+                            this.cart[p.id] = packageMap[p.name];
+                        } else {
+                            this.cart[p.id] = 0;
+                        }
+                    });
+                },
 
-          const ingreso = prompt("Introduce tu PIN de administrador:");
-          if (ingreso === this.adminPin) {
-            sessionStorage.setItem('cleanbox_admin_auth', 'true');
-            this.showAdmin = true;
-            this.$nextTick(() => { lucide.createIcons(); });
-          } else if (ingreso !== null) {
-            alert("PIN incorrecto. Acceso denegado.");
-          }
-        },
+                clearCart() {
+                    this.products.forEach(p => {
+                        this.cart[p.id] = 0;
+                    });
+                },
 
-        // Lógica estricta de incremento: de 0.25 en 0.25 solo antes de 1L; a partir de 1L sube de 1 en 1 Litro.
-        increaseQty(product) {
-          if (product.unit === 'pieza') {
-            product.qty = Math.round((product.qty + 1.0) * 100) / 100;
-          } else {
-            if (product.qty < 1.0) {
-              product.qty = Math.round((product.qty + 0.25) * 100) / 100;
-            } else {
-              product.qty = Math.round((product.qty + 1.0) * 100) / 100;
+                get filteredProducts() {
+                    return this.products.filter(p => {
+                        let matchesCategory = this.selectedCategory === 'todos' || p.category === this.selectedCategory;
+                        let matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
+                                          p.description.toLowerCase().includes(this.searchQuery.toLowerCase());
+                        return matchesCategory && matchesSearch;
+                    });
+                },
+
+                get activeItemsCount() {
+                    return Object.values(this.cart).filter(qty => qty > 0).length;
+                },
+
+                get totalSaleAmount() {
+                    let total = 0;
+                    this.products.forEach(p => {
+                        let qty = this.cart[p.id] || 0;
+                        total += this.calculatePrice(p) * qty;
+                    });
+                    return total;
+                },
+
+                get totalSavings() {
+                    let savings = 0;
+                    this.products.forEach(p => {
+                        let qty = this.cart[p.id] || 0;
+                        let saleP = this.calculatePrice(p);
+                        let superP = p.supermarketPrice;
+                        if (p.unit === 'barra' || p.unit === 'L') {
+                            savings += (superP - saleP) * qty;
+                        }
+                    });
+                    return savings > 0 ? savings : 0;
+                },
+
+                authorizeOwner() {
+                    if (this.pinInput === 'niko10emma17') {
+                        this.ownerAuthorized = true;
+                    } else {
+                        alert('Contraseña incorrecta');
+                    }
+                },
+
+                sendWhatsAppOrder() {
+                    if (this.totalSaleAmount <= 0) {
+                        alert('Por favor selecciona al menos un producto para realizar tu pedido.');
+                        return;
+                    }
+                    if (!this.customer.name || !this.customer.colonia || !this.customer.calle) {
+                        alert('Por favor ingresa tu Nombre, Colonia y Calle para el envío.');
+                        return;
+                    }
+
+                    let message = `*¡Hola! Nuevo Pedido de Clean Box* 🧹✨\n\n`;
+                    message += `👤 *Cliente:* ${this.customer.name}\n`;
+                    message += `📍 *Colonia:* ${this.customer.colonia}\n`;
+                    message += `🏠 *Calle/Número:* ${this.customer.calle}\n\n`;
+                    message += `*Detalle de Productos:*\n`;
+
+                    let orderItems = [];
+                    let totalCogs = 0;
+
+                    this.products.forEach(p => {
+                        let qty = this.cart[p.id] || 0;
+                        if (qty > 0) {
+                            let unitPrice = this.calculatePrice(p);
+                            let subtotal = unitPrice * qty;
+                            let cogsSub = (p.baseCost + p.bottleCost) * qty;
+                            totalCogs += cogsSub;
+
+                            message += `- ${p.name}: ${qty} ${p.unit} ($${subtotal.toFixed(2)})\n`;
+                            orderItems.push({
+                                name: p.name,
+                                qty: qty,
+                                unit: p.unit,
+                                subtotal: subtotal
+                            });
+                        }
+                    });
+
+                    message += `\n💰 *Total Venta:* $${this.totalSaleAmount.toFixed(2)}\n`;
+                    if (this.totalSaleAmount >= 700) {
+                        message += `🚚 *Envío:* ¡GRATIS (Compra mayor a $700)!\n`;
+                    } else {
+                        message += `🚚 *Envío:* Estándar\n`;
+                    }
+                    message += `\n¡Quedo a la espera de la confirmación de entrega!`;
+
+                    // Guardar en Historial de Pedidos
+                    let profit = this.totalSaleAmount - totalCogs;
+                    this.orders.unshift({
+                        date: new Date().toLocaleString(),
+                        customer: { ...this.customer },
+                        items: orderItems,
+                        total: this.totalSaleAmount,
+                        cogs: totalCogs,
+                        profit: profit
+                    });
+
+                    // Abrir WhatsApp
+                    let encoded = encodeURIComponent(message);
+                    window.open(`https://wa.me/525545256011?text=${encoded}`, '_blank');
+                }
             }
-          }
-          this.$nextTick(() => { lucide.createIcons(); });
-        },
-
-        decreaseQty(product) {
-          if (product.unit === 'pieza') {
-            product.qty = Math.max(0, Math.round((product.qty - 1.0) * 100) / 100);
-          } else {
-            if (product.qty <= 1.0 && product.qty > 0) {
-              product.qty = Math.max(0, Math.round((product.qty - 0.25) * 100) / 100);
-            } else if (product.qty > 1.0) {
-              product.qty = Math.max(1.0, Math.round((product.qty - 1.0) * 100) / 100);
-            }
-          }
-          this.$nextTick(() => { lucide.createIcons(); });
-        },
-
-        setQty(product, val) {
-          product.qty = val;
-          this.$nextTick(() => { lucide.createIcons(); });
-        },
-
-        resetCart() {
-          this.products.forEach(p => p.qty = 0);
-          this.$nextTick(() => { lucide.createIcons(); });
-        },
-
-        getActiveProducts() {
-          return this.products.filter(p => p.qty > 0);
-        },
-
-        formatQty(qty, unit) {
-          if (unit === 'pieza') return `${qty} pieza${qty !== 1 ? 's' : ''}`;
-          if (qty < 1 && qty > 0) return `${Math.round(qty * 1000)} ml`;
-          return `${qty} L`;
-        },
-
-        formatCurrency(amount) {
-          return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
-        },
-
-        calculateTotals() {
-          let totalCost = 0;
-          let marketPrice = 0;
-
-          this.products.forEach(p => {
-            totalCost += p.qty * p.costPrice;
-            marketPrice += p.qty * p.marketPrice;
-          });
-
-          const marginDecimal = this.targetMargin / 100;
-          let salePrice = totalCost > 0 ? totalCost / (1 - marginDecimal) : 0;
-          
-          if (salePrice > marketPrice && marketPrice > 0) {
-            salePrice = marketPrice * 0.85;
-          }
-
-          const profit = salePrice - totalCost;
-          const savings = Math.max(0, marketPrice - salePrice);
-
-          return { totalCost, salePrice, profit, marketPrice, savings };
-        },
-
-        sendWhatsApp() {
-          const totals = this.calculateTotals();
-          let itemsList = '';
-          
-          this.products.forEach(p => {
-            if (p.qty > 0) {
-              itemsList += `• ${p.name}: ${this.formatQty(p.qty, p.unit)}\n`;
-            }
-          });
-
-          if (!itemsList) {
-            alert('Por favor selecciona al menos un producto para armar tu membresía.');
-            return;
-          }
-
-          let addressText = '';
-          if (this.shipping.name || this.shipping.street || this.shipping.colonia || this.shipping.cp || this.shipping.extra) {
-            addressText = `\n📋 *COMPROBANTE DE DOMICILIO Y ENTREGA:*\n` +
-              (this.shipping.name ? `• Nombre: ${this.shipping.name}\n` : '') +
-              (this.shipping.street ? `• Calle y Núm: ${this.shipping.street}\n` : '') +
-              (this.shipping.extra ? `• Apto/Suite: ${this.shipping.extra}\n` : '') +
-              (this.shipping.colonia ? `• Colonia: ${this.shipping.colonia}\n` : '') +
-              (this.shipping.cp ? `• C.P.: ${this.shipping.cp}\n` : '');
-          } else {
-            addressText = `\n📋 *COMPROBANTE DE ENTREGA:*\n• Domicilio: (No especificado por el cliente)\n`;
-          }
-
-          const text = `📄 *DOCUMENTO DE PEDIDO - CLEAN BOX*\n\n` +
-            `🛒 *Lista de Productos Seleccionados:*\n${itemsList}\n` +
-            `${addressText}\n` +
-            `💰 *Precio Membresía:* ${this.formatCurrency(totals.salePrice)}\n` +
-            `✨ *Ahorro vs Súper:* ${this.formatCurrency(totals.savings)}\n\n` +
-            `¿Me podrías confirmar mi pedido y la entrega?`;
-          
-          window.open(`https://wa.me/525545256011?text=${encodeURIComponent(text)}`, '_blank');
         }
-      }
-    }
-  </script>
+    </script>
 </body>
 </html>
 
