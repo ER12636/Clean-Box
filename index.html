@@ -14,7 +14,7 @@
         body { font-family: 'Poppins', sans-serif; }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-32" x-data="cleanBoxApp()">
+<body class="bg-slate-50 text-slate-800 antialiased pb-44 md:pb-36" x-data="cleanBoxApp()">
 
     <!-- Header / Navbar -->
     <header class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
@@ -98,7 +98,6 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <template x-for="product in filteredProducts" :key="product.id">
                 <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition border border-slate-200 p-4 flex flex-col justify-between relative group">
-                    <!-- Badge Categoría -->
                     <div>
                         <div class="flex justify-between items-start mb-2">
                             <span class="text-[10px] font-bold uppercase px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md tracking-wider capitalize" x-text="product.category"></span>
@@ -109,15 +108,10 @@
                     </div>
 
                     <div>
-                        <div class="flex items-baseline justify-between mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                            <div>
-                                <span class="text-[11px] text-slate-400 block leading-none">Precio venta</span>
-                                <span class="text-lg font-bold text-blue-600" x-text="'$' + calculatePrice(product).toFixed(2)"></span>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] text-slate-400 block leading-none">Súper Aprox.</span>
-                                <span class="text-xs text-slate-400 line-through" x-text="'$' + product.supermarketPrice"></span>
-                            </div>
+                        <!-- Indicador de precio de súper sin mostrar el precio de venta unitario -->
+                        <div class="flex items-center justify-between mb-4 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                            <span class="text-xs text-slate-500 font-medium">Cotizado c/envase ($10)</span>
+                            <span class="text-xs font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-md" x-text="'Súper: $' + product.supermarketPrice"></span>
                         </div>
 
                         <!-- Selector de Presentación / Cantidad -->
@@ -129,12 +123,17 @@
                                 <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
                             </div>
                             
-                            <!-- Botones rápidos -->
+                            <!-- Botones rápidos de cantidad -->
                             <div class="flex gap-1.5 pt-1">
                                 <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
                                 <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
                                 <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
                             </div>
+
+                            <!-- Botón individual de eliminar debajo de las cantidades -->
+                            <button @click="cart[product.id] = 0" x-show="cart[product.id] > 0" class="w-full mt-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-1.5 rounded-lg transition border border-rose-200 flex items-center justify-center space-x-1">
+                                <span>🗑️ Quitar de mi lista</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -143,12 +142,35 @@
 
     </main>
 
-    <!-- FLOATING CART / CHECKOUT BAR -->
+    <!-- FLOATING CART / CHECKOUT BAR CON LISTA ACUMULADA -->
     <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            
+            <!-- Lista Acumulada de Productos Seleccionados -->
+            <div class="mb-3 bg-slate-50 border border-slate-200 rounded-xl p-2.5 max-h-32 overflow-y-auto">
+                <div class="flex justify-between items-center mb-1 border-b border-slate-200 pb-1">
+                    <span class="text-xs font-bold text-slate-700">📋 Productos seleccionados en tu lista:</span>
+                    <span class="text-xs text-blue-600 font-semibold" x-text="activeItemsCount + ' artículos'"></span>
+                </div>
+                <template x-if="activeItemsCount === 0">
+                    <p class="text-xs text-slate-400 italic py-1 text-center">Aún no has agregado productos a tu lista.</p>
+                </template>
+                <div class="flex flex-wrap gap-1.5 mt-1">
+                    <template x-for="product in products" :key="'list-' + product.id">
+                        <template x-if="cart[product.id] > 0">
+                            <div class="inline-flex items-center bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs shadow-xs space-x-2">
+                                <span class="font-medium text-slate-800" x-text="product.name + ' (' + cart[product.id] + ' ' + product.unit + ')'"></span>
+                                <span class="text-blue-600 font-bold" x-text="'$' + (calculatePrice(product) * cart[product.id]).toFixed(2)"></span>
+                                <button @click="cart[product.id] = 0" class="text-rose-500 hover:text-rose-700 font-bold ml-1">×</button>
+                            </div>
+                        </template>
+                    </template>
+                </div>
+            </div>
+
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                 
-                <!-- Resumen de Totales y Productos Seleccionados -->
+                <!-- Resumen de Totales y Nota de Envío Gratis -->
                 <div class="flex items-center space-x-6 w-full md:w-auto justify-between md:justify-start">
                     <div>
                         <span class="text-xs text-slate-500 block">Total a Pagar</span>
@@ -157,18 +179,18 @@
                             <span class="text-xs text-emerald-600 font-semibold" x-text="'Ahorro: $' + totalSavings.toFixed(2)"></span>
                         </div>
                     </div>
-                    <div class="hidden sm:block border-l border-slate-200 pl-6">
-                        <span class="text-xs text-slate-500 block">Productos en Lista</span>
-                        <span class="text-sm font-semibold text-slate-700" x-text="activeItemsCount + ' artículos'"></span>
+                    <div class="border-l border-slate-200 pl-4">
+                        <span class="text-[11px] font-semibold text-blue-700 block" x-text="totalSaleAmount >= 700 ? '🚚 ¡Envío Gratis Aplicado!' : '🚚 Faltan $' + (700 - totalSaleAmount).toFixed(2) + ' para envío gratis'"></span>
+                        <span class="text-[10px] text-slate-400">En compras mayores a $700</span>
                     </div>
                 </div>
 
-                <!-- Datos de Envío Breves + Botón WhatsApp -->
-                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- Datos de Envío Obligatorios + Botón WhatsApp -->
+                <div class="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
                     <div class="grid grid-cols-2 sm:flex gap-2 w-full md:w-auto">
-                        <input type="text" x-model="customer.name" placeholder="Tu Nombre *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <input type="text" x-model="customer.colonia" placeholder="Colonia *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <input type="text" x-model="customer.calle" placeholder="Calle y Núm *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-1">
+                        <input type="text" x-model="customer.name" placeholder="Nombre (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" x-model="customer.colonia" placeholder="Colonia (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <input type="text" x-model="customer.calle" placeholder="Calle y Núm (Obligatorio) *" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-1">
                     </div>
 
                     <button @click="sendWhatsAppOrder()" 
@@ -204,16 +226,16 @@
                 <div class="space-y-6">
                     <!-- Pestañas del Panel de Dueño -->
                     <div class="flex space-x-2 border-b border-slate-200 pb-3">
-                        <button @click="ownerTab = 'margen'" :class="ownerTab === 'margen' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">⚙️ Margen de Ganancia</button>
-                        <button @click="ownerTab = 'historial'" :class="ownerTab === 'historial' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">📋 Historial de Pedidos</button>
+                        <button @click="ownerTab = 'margen'" :class="ownerTab === 'margen' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">⚙️ Margen y Costos</button>
+                        <button @click="ownerTab = 'historial'" :class="ownerTab === 'historial' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">📋 Pedidos y Ganancias</button>
                     </div>
 
                     <!-- Pestaña 1: Configurar Margen -->
                     <div x-show="ownerTab === 'margen'" class="space-y-6">
                         <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
                             <div>
-                                <h4 class="font-bold text-blue-900 text-sm">Margen de Ganancia Actual</h4>
-                                <p class="text-xs text-blue-700">Ajusta el porcentaje para recalcular automáticamente los precios de venta de todo el catálogo.</p>
+                                <h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo</h4>
+                                <p class="text-xs text-blue-700">Cada envase se está cotizando automáticamente en $10.00.</p>
                             </div>
                             <div class="text-2xl font-bold text-blue-600" x-text="(targetMargin * 100).toFixed(0) + '%'"></div>
                         </div>
@@ -223,7 +245,7 @@
                             <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" class="w-full accent-blue-600">
                         </div>
 
-                        <!-- Tabla de Auditoría de Costos y Envases -->
+                        <!-- Tabla de Auditoría de Costos y Envases ($10) -->
                         <div class="overflow-x-auto border border-slate-200 rounded-xl">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
@@ -252,7 +274,7 @@
                         </div>
                     </div>
 
-                    <!-- Pestaña 2: Historial de Pedidos -->
+                    <!-- Pestaña 2: Historial de Pedidos, Margen y Dirección -->
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos Realizados</h4>
@@ -277,14 +299,14 @@
                                     </div>
 
                                     <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-100">
-                                        <div><strong>Dirección:</strong> <span x-text="order.customer.calle + ', Col. ' + order.customer.colonia"></span></div>
+                                        <div><strong>Dirección de Entrega:</strong> <span class="text-blue-700 font-medium" x-text="order.customer.calle + ', Col. ' + order.customer.colonia"></span></div>
                                         <div><strong>Total Venta:</strong> <span class="font-bold text-blue-600" x-text="'$' + order.total.toFixed(2)"></span></div>
-                                        <div><strong>Costo Total (COGS):</strong> <span class="text-slate-600" x-text="'$' + order.cogs.toFixed(2)"></span></div>
-                                        <div><strong>Ganancia Neta:</strong> <span class="font-bold text-emerald-600" x-text="'$' + order.profit.toFixed(2) + ' (' + ((order.profit/order.total)*100).toFixed(1) + '%)'"></span></div>
+                                        <div><strong>Costo Total (Insumos + Envases):</strong> <span class="text-slate-600" x-text="'$' + order.cogs.toFixed(2)"></span></div>
+                                        <div><strong>Ganancia Obtenida (Margen):</strong> <span class="font-bold text-emerald-600" x-text="'$' + order.profit.toFixed(2) + ' (' + ((order.profit/order.total)*100).toFixed(1) + '%)'"></span></div>
                                     </div>
 
                                     <div class="text-xs text-slate-600">
-                                        <strong>Productos:</strong>
+                                        <strong>Productos Solicitados:</strong>
                                         <div class="flex flex-wrap gap-1 mt-1">
                                             <template x-for="item in order.items">
                                                 <span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded-md" x-text="item.name + ' (' + item.qty + ' ' + item.unit + ') - $' + item.subtotal.toFixed(2)"></span>
@@ -325,37 +347,47 @@
 
                 products: [
                     // Categoría Ropa
-                    { id: 1, name: 'Suavitel', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
-                    { id: 2, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 48, unit: 'L', badge: 'Top' },
-                    { id: 3, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
-                    { id: 4, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
-                    { id: 5, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
-                    { id: 6, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
-                    { id: 7, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 21.11, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
+                    { id: 1, name: 'Suavitel', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
+                    { id: 2, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 48, unit: 'L', badge: 'Top' },
+                    { id: 3, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
+                    { id: 4, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
+                    { id: 5, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
+                    { id: 6, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
+                    { id: 7, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
                     { id: 8, name: 'Jabón Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
 
                     // Categoría Limpieza
-                    { id: 9, name: 'Shampoo para manos', category: 'limpieza', description: 'Suave con tus manos, aroma agradable', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 35, unit: 'L', badge: 'Hogar' },
-                    { id: 10, name: 'Shampoo para trastes', category: 'limpieza', description: 'Arrancagrasa concentrado para cocina', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 55, unit: 'L', badge: 'Alta Potencia' },
-                    { id: 11, name: 'Fabuloso', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 21.11, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
-                    { id: 12, name: 'Pino Verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 21.11, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
-                    { id: 13, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 21.11, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
-                    { id: 14, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 21.11, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
-                    { id: 15, name: 'Multilimpiador', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 21.11, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
-                    { id: 16, name: 'Jabón multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
+                    { id: 9, name: 'Fabuloso', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
+                    { id: 10, name: 'Pino Verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
+                    { id: 11, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 10.00, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
+                    { id: 12, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
+                    { id: 13, name: 'Multilimpiador', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
+                    { id: 14, name: 'Jabón multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
+                    { id: 15, name: 'Shampoo para Trastes', category: 'limpieza', description: 'Arrancagrasa concentrado cocina', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Trastes' },
 
-                    // Otras categorías con costos reales ajustados con envases
-                    { id: 17, name: 'Crema Corporal Hidratante', category: 'cremas', description: 'Nutrición profunda para piel seca', baseCost: 22.00, bottleCost: 4.34, supermarketPrice: 65, unit: 'L', badge: 'Cuidado' },
-                    { id: 18, name: 'Shampoo Capilar Herbal', category: 'shampoo', description: 'Fortalecimiento y brillo capilar', baseCost: 20.00, bottleCost: 21.11, supermarketPrice: 58, unit: 'L', badge: 'Cabello' },
-                    { id: 19, name: 'Shampoo para Auto', category: 'auto', description: 'Jabón especializado para carrocería con cera', baseCost: 18.50, bottleCost: 21.11, supermarketPrice: 55, unit: 'L', badge: 'Automotriz' },
-                    { id: 20, name: 'Aromatizante Ambiental', category: 'aromatizantes', description: 'Esencia duradera para espacios y hogar', baseCost: 16.00, bottleCost: 4.34, supermarketPrice: 45, unit: 'L', badge: 'Aroma' },
-                    { id: 21, name: 'Desengrasante Industrial', category: 'desengrasantes', description: 'Removedor de grasa pesada en motores y cocinas', baseCost: 32.95, bottleCost: 21.11, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
+                    // Categoría Cremas
+                    { id: 16, name: 'Crema Sólida Nutritiva', category: 'cremas', description: 'Crema sólida humectante corporal', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 60, unit: 'pieza', badge: 'Sólida' },
+                    { id: 17, name: 'Crema Líquida Corporal', category: 'cremas', description: 'Hidratación profunda para piel seca', baseCost: 22.00, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Líquida' },
+
+                    // Categoría Shampoo
+                    { id: 18, name: 'Shampoo de Manos Aroma', category: 'shampoo', description: 'Suave con tus manos, agradable aroma', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
+                    { id: 19, name: 'Shampoo Capilar Herbal', category: 'shampoo', description: 'Fortalecimiento y brillo capilar', baseCost: 20.00, bottleCost: 10.00, supermarketPrice: 58, unit: 'L', badge: 'Cabello' },
+                    { id: 20, name: 'Shampoo para Perro', category: 'shampoo', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
+
+                    // Categoría Auto
+                    { id: 21, name: 'Shampoo para Auto', category: 'auto', description: 'Jabón especializado carrocería con cera', baseCost: 18.50, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Auto' },
+
+                    // Categoría Aromatizantes
+                    { id: 22, name: 'Aromatizante Ambiental', category: 'aromatizantes', description: 'Esencia duradera para espacios y hogar', baseCost: 16.00, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Aroma' },
+
+                    // Categoría Desengrasantes
+                    { id: 23, name: 'Desengrasante Industrial', category: 'desengrasantes', description: 'Removedor de grasa pesada en motores y cocinas', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
                 ],
 
                 cart: {},
 
                 init() {
-                    // Inicializar carrito en 0
+                    // Inicializar carrito completamente en ceros
                     this.products.forEach(p => {
                         this.cart[p.id] = 0;
                     });
@@ -384,24 +416,17 @@
                 },
 
                 loadMembresiaFamiliar() {
-                    // Cargar cantidades de la membresía familiar estándar
                     const packageMap = {
-                        "Shampoo para manos": 2,
-                        "Shampoo para trastes": 2,
+                        "Shampoo de Manos Aroma": 2,
+                        "Shampoo para Trastes": 2,
                         "Suavitel": 3,
                         "Vel Rosita": 1,
                         "Vanish": 2,
                         "Plancha Fácil": 1,
                         "Más Color": 1,
-                        "Más Negro": 0.5,
-                        "Más Blanco": 0.5,
-                        "Desengrasante Industrial": 1,
                         "Fabuloso": 2.5,
-                        "Pino Verde": 1,
                         "Cloro": 3,
-                        "Quitasarro": 1,
-                        "Multilimpiador": 1,
-                        "Jabón multiusos": 2,
+                        "Desengrasante Industrial": 1,
                         "Jabón Zote": 1
                     };
 
@@ -448,9 +473,7 @@
                         let qty = this.cart[p.id] || 0;
                         let saleP = this.calculatePrice(p);
                         let superP = p.supermarketPrice;
-                        if (p.unit === 'barra' || p.unit === 'L') {
-                            savings += (superP - saleP) * qty;
-                        }
+                        savings += (superP - saleP) * qty;
                     });
                     return savings > 0 ? savings : 0;
                 },
@@ -469,7 +492,7 @@
                         return;
                     }
                     if (!this.customer.name || !this.customer.colonia || !this.customer.calle) {
-                        alert('Por favor ingresa tu Nombre, Colonia y Calle para el envío.');
+                        alert('Por favor completa los campos obligatorios de entrega: Nombre, Colonia y Calle.');
                         return;
                     }
 
@@ -508,7 +531,7 @@
                     }
                     message += `\n¡Quedo a la espera de la confirmación de entrega!`;
 
-                    // Guardar en Historial de Pedidos
+                    // Guardar en Historial del Dueño (con margen, ganancia y dirección completa)
                     let profit = this.totalSaleAmount - totalCogs;
                     this.orders.unshift({
                         date: new Date().toLocaleString(),
