@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -579,30 +578,41 @@
                         alert('Por favor selecciona al menos un producto para realizar tu pedido.');
                         return;
                     }
+
                     if (!this.customer.nombre || !this.customer.cp || !this.customer.estado || !this.customer.ciudad || !this.customer.colonia || !this.customer.calleNum) {
                         alert('Por favor completa los campos obligatorios de entrega.');
+                        this.showAddressForm = true;
                         return;
                     }
 
-                    let message = `*¡Hola! Nuevo Pedido de Clean Box* 🧹✨\n\n`;
-                    message += `👤 *Cliente:* ${this.customer.nombre}\n`;
-                    message += `📍 *Dirección:* ${this.customer.calleNum} ${this.customer.apto ? '(Apto/Suite: ' + this.customer.apto + ')' : ''}, Col. ${this.customer.colonia}, ${this.customer.ciudad}, ${this.customer.estado} (C.P. ${this.customer.cp})\n\n`;
-                    message += `*Detalle de Productos:*\n`;
+                    const total = this.totalSaleAmount;
+                    let message = `*¡Hola! Nuevo Pedido de Clean Box* 🧹✨
 
-                    let orderItems = [];
+`;
+                    message += `👤 *Cliente:* ${this.customer.nombre}
+`;
+                    message += `📍 *Dirección:* ${this.customer.calleNum} `;
+                    message += `${this.customer.apto ? '(Apto/Suite: ' + this.customer.apto + ') ' : ''}`;
+                    message += `, Col. ${this.customer.colonia}, ${this.customer.ciudad}, ${this.customer.estado} (C.P. ${this.customer.cp})
+
+`;
+                    message += `*Detalle de Productos:*
+`;
+
+                    const orderItems = [];
                     let totalCogs = 0;
 
                     this.products.forEach(p => {
-                        let qty = this.cart[p.id] || 0;
+                        const qty = Number(this.cart[p.id]) || 0;
                         if (qty > 0) {
-                            let unitPrice = this.calculatePrice(p);
-                            let subtotal = unitPrice * qty;
-                            let cogsSub = (p.baseCost + p.bottleCost) * qty;
+                            const subtotal = this.calculatePrice(p) * qty;
+                            const cogsSub = (p.baseCost + p.bottleCost) * qty;
                             totalCogs += cogsSub;
-                            let itemProfit = subtotal - cogsSub;
+                            const itemProfit = subtotal - cogsSub;
+                            const unitLabel = p.unit === 'barra' ? 'barras' : p.unit;
 
-                            let unitLabel = p.unit === 'barra' ? 'barras' : p.unit;
-                            message += `- ${p.name}: ${qty} ${unitLabel} ($${subtotal.toFixed(2)})\n`;
+                            message += `- ${p.name}: ${qty} ${unitLabel} ($${subtotal.toFixed(2)})
+`;
                             orderItems.push({
                                 name: p.name,
                                 qty: qty,
@@ -613,46 +623,46 @@
                         }
                     });
 
-                    message += `\n💰 *Total Venta:* $${this.totalSaleAmount.toFixed(2)}\n`;
-                    if (this.totalSaleAmount >= 700) {
-                        message += `🚚 *Envío:* ¡GRATIS (Compra mayor a $700)!\n`;
-                    } else {
-                        message += `🚚 *Envío:* Estándar\n`;
-                    }
-                    message += `\n¡Quedo a la espera de la confirmación de entrega!`;
+                    message += `
+💰 *Total Venta:* $${total.toFixed(2)}
+`;
+                    message += total >= 700
+                        ? `🚚 *Envío:* ¡GRATIS (Compra mayor a $700)!
+`
+                        : `🚚 *Envío:* Estándar
+`;
+                    message += `
+¡Quedo a la espera de la confirmación de entrega!`;
 
-                    let profit = this.totalSaleAmount - totalCogs;
+                    // Abrir WhatsApp directamente durante el clic para evitar bloqueos del navegador.
+                    const whatsappUrl = `https://wa.me/5215545256011?text=${encodeURIComponent(message)}`;
+                    const whatsappTab = window.open(whatsappUrl, '_blank');
 
-                    if (!db) {
-                        alert("El pedido todavía no se puede registrar: falta configurar Firebase con los datos reales de tu proyecto.");
-                        return;
-                    }
-
-                    // Abrimos la pestaña durante el clic del usuario para evitar que el navegador bloquee WhatsApp.
-                    const whatsappTab = window.open("about:blank", "_blank");
                     if (!whatsappTab) {
-                        alert("Tu navegador bloqueó la ventana de WhatsApp. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.");
+                        alert('El navegador bloqueó WhatsApp. Permite las ventanas emergentes para esta página e inténtalo de nuevo.');
                         return;
                     }
-                    whatsappTab.document.write("<p style='font-family:Arial;padding:24px'>Registrando tu pedido de Clean Box...</p>");
 
-                    db.collection("orders").add({
-                        date: new Date().toLocaleString("es-MX"),
+                    // Guardar el pedido en Firebase por separado: si Firebase falla, WhatsApp ya estará abierto.
+                    if (!db) {
+                        alert('WhatsApp se abrió, pero el pedido no se guardó en la nube porque Firebase no está disponible.');
+                        return;
+                    }
+
+                    db.collection('orders').add({
+                        date: new Date().toLocaleString('es-MX'),
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         customer: { ...this.customer },
                         items: orderItems,
-                        total: this.totalSaleAmount,
+                        total: total,
                         cogs: totalCogs,
-                        profit: profit,
+                        profit: total - totalCogs,
                         completed: false
                     }).then(() => {
-                        const encoded = encodeURIComponent(message);
-                        whatsappTab.location.href = `https://wa.me/5215545256011?text=${encoded}`;
-                        alert("¡Pedido registrado! Ahora puedes enviarlo por WhatsApp.");
-                    }).catch((error) => {
-                        whatsappTab.close();
-                        console.error("Error al registrar pedido:", error);
-                        alert("Hubo un error al registrar el pedido en Firebase: " + error.message + ". No se abrió WhatsApp para evitar enviar un pedido que no quedó guardado.");
+                        console.log('Pedido registrado correctamente en Firebase.');
+                    }).catch(error => {
+                        console.error('Error al registrar el pedido en Firebase:', error);
+                        alert('WhatsApp se abrió, pero Firebase no pudo guardar el pedido. Revisa la configuración y las reglas de seguridad.');
                     });
                 }
             }
