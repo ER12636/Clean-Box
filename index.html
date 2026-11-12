@@ -296,7 +296,7 @@
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos en la Nube (Sincronizado)</h4>
-                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial local/nube</button>
+                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
                         </div>
 
                         <template x-if="orders.length === 0">
@@ -349,7 +349,7 @@
 
     <!-- ALPINE.JS LOGIC -->
     <script>
-        // CONFIGURACIÓN DE FIREBASE (Reemplaza estos datos con los de tu consola de Firebase)
+        // CONFIGURACIÓN DE FIREBASE (Reemplaza con tus datos reales de Firebase)
         const firebaseConfig = {
             apiKey: "TU_API_KEY_DE_FIREBASE",
             authDomain: "tu-proyecto.firebaseapp.com",
@@ -359,7 +359,6 @@
             appId: "tu-app-id"
         };
 
-        // Inicializar Firebase
         if (!firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
         }
@@ -392,7 +391,6 @@
                 categories: ['ropa', 'limpieza', 'cremas sólidas', 'cremas líquidas', 'shampoo de manos', 'otros shampoos', 'auto', 'aromatizantes', 'desengrasantes'],
 
                 products: [
-                    // --- SECCIÓN ROPA Y FOTOGRAFÍAS (Zote a $25 exacto) ---
                     { id: 1, name: 'Barra Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
                     { id: 2, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
                     { id: 3, name: 'Suavitel azul', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
@@ -401,8 +399,6 @@
                     { id: 6, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
                     { id: 7, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
                     { id: 8, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
-
-                    // --- SECCIÓN LIMPIEZA ---
                     { id: 9, name: 'Desmugrante', category: 'limpieza', description: 'Elimina mugre y grasa difícil', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Potente' },
                     { id: 10, name: 'Fabulosos', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
                     { id: 11, name: 'Pino verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
@@ -411,21 +407,15 @@
                     { id: 14, name: 'Multilimpiador Fab', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
                     { id: 15, name: 'Jabón líquido Multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
                     { id: 16, name: 'Shampoo Lavatrastes', category: 'limpieza', description: 'Arrancagrasa concentrado cocina', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Trastes' },
-
-                    // --- CREMAS SÓLIDAS ---
                     { id: 17, name: 'Crema T/Nívea Sólida', category: 'cremas sólidas', description: 'Crema sólida humectante corporal', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
                     { id: 18, name: 'Crema T/Pons Sólida', category: 'cremas sólidas', description: 'Nutrición y suavidad', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
                     { id: 19, name: 'Crema Bebé Sólida', category: 'cremas sólidas', description: 'Especial para piel sensible', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
                     { id: 20, name: 'Crema Rosas Sólida', category: 'cremas sólidas', description: 'Aroma fresco floral', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
                     { id: 21, name: 'Crema Concha Nácar Sólida', category: 'cremas sólidas', description: 'Aclarante y nutritiva', baseCost: 94.90, bottleCost: 0.00, supermarketPrice: 160, unit: 'kg', badge: 'Especial' },
-
-                    // --- CREMAS LÍQUIDAS ---
                     { id: 22, name: 'Crema T/Nívea Líquida', category: 'cremas líquidas', description: 'Hidratación profunda corporal', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
                     { id: 23, name: 'Crema T/Pons Líquida', category: 'cremas líquidas', description: 'Hidratación y cuidado diario', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
                     { id: 24, name: 'Crema Almendras Líquida', category: 'cremas líquidas', description: 'Suavidad extrema con almendras', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
                     { id: 25, name: 'Crema Aloe Vera Líquida', category: 'cremas líquidas', description: 'Frescura regeneradora', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
-
-                    // --- SHAMPOO DE MANOS ---
                     { id: 26, name: 'Shampoo Manos Manzana', category: 'shampoo de manos', description: 'Suave con tus manos, aroma manzana', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
                     { id: 27, name: 'Shampoo Manos Coco', category: 'shampoo de manos', description: 'Aroma dulce y limpieza delicada', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
                     { id: 28, name: 'Shampoo Manos Almendras', category: 'shampoo de manos', description: 'Protección e hidratación para manos', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
@@ -433,27 +423,19 @@
                     { id: 30, name: 'Shampoo Manos Pétalos de Rosa', category: 'shampoo de manos', description: 'Suavidad floral', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
                     { id: 31, name: 'Shampoo Manos Durazno', category: 'shampoo de manos', description: 'Aroma frutal', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
                     { id: 32, name: 'Shampoo Manos Fresa', category: 'shampoo de manos', description: 'Aroma dulce a fresa', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-
-                    // --- OTROS SHAMPOOS ---
                     { id: 33, name: 'Shampoo Perro', category: 'otros shampoos', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
                     { id: 34, name: 'SH. T/Menen', category: 'otros shampoos', description: 'Fortalecimiento y brillo capilar', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
                     { id: 35, name: 'SH. Jojoba', category: 'otros shampoos', description: 'Hidratación capilar con jojoba', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
                     { id: 36, name: 'SH. Sábila', category: 'otros shampoos', description: 'Nutrición natural', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
-
-                    // --- PRODUCTOS PARA AUTO ---
                     { id: 37, name: 'SH. P/Auto C/cera', category: 'auto', description: 'Jabón especializado carrocería con cera', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Auto' },
                     { id: 38, name: 'Allmoroll Liq', category: 'auto', description: 'Protector de vinil y tableros', baseCost: 64.95, bottleCost: 10.00, supermarketPrice: 120, unit: 'L', badge: 'Auto' },
                     { id: 39, name: 'Abrillantador de llantas', category: 'auto', description: 'Brillo duradero en neumáticos', baseCost: 64.95, bottleCost: 10.00, supermarketPrice: 120, unit: 'L', badge: 'Auto' },
                     { id: 40, name: 'Limpiaparabrisas', category: 'auto', description: 'Visibilidad impecable', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Auto' },
-
-                    // --- AROMATIZANTES ---
                     { id: 41, name: 'Aromatizante Herbal', category: 'aromatizantes', description: 'Esencia herbal duradera', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
                     { id: 42, name: 'Aromatizante Bosques', category: 'aromatizantes', description: 'Aroma fresco a bosque', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
                     { id: 43, name: 'Aromatizante Mar Fresco', category: 'aromatizantes', description: 'Brisa marina ambiental', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
                     { id: 44, name: 'Aromatizante Vainilla', category: 'aromatizantes', description: 'Dulce aroma a vainilla', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
                     { id: 45, name: 'Aromatizante Cereza', category: 'aromatizantes', description: 'Intenso aroma a cereza', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-
-                    // --- DESENGRASANTES ---
                     { id: 46, name: 'Desengrasante T/Windex', category: 'desengrasantes', description: 'Limpieza impecable en cristales y superficies', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Potente' },
                     { id: 47, name: 'Desengrasante Ultravioleta', category: 'desengrasantes', description: 'Removedor de grasa pesada', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' },
                     { id: 48, name: 'Ultradesengrasante C/Aroma', category: 'desengrasantes', description: 'Poder industrial aromatizado', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
@@ -462,13 +444,12 @@
                 cart: {},
 
                 init() {
-                    // Cargar margen guardado si existe
                     let savedMargin = localStorage.getItem('cleanbox_target_margin');
                     if (savedMargin !== null) {
                         this.targetMargin = parseFloat(savedMargin);
                     }
 
-                    // Sincronizar pedidos en tiempo real desde Firebase Firestore para TODOS los dispositivos
+                    // Sincronización en tiempo real desde la nube (Firebase Firestore)
                     db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                         this.orders = snapshot.docs.map(doc => ({
                             id: doc.id,
@@ -560,7 +541,6 @@
                 },
 
                 toggleOrderStatus(order) {
-                    // Actualiza el estado directamente en Firebase (sincronizado en todos los dispositivos)
                     db.collection("orders").doc(order.id).update({
                         completed: !order.completed
                     }).catch(error => {
@@ -627,7 +607,7 @@
 
                     let profit = this.totalSaleAmount - totalCogs;
 
-                    // Guardar directamente en la base de datos de Firebase (Nube en tiempo real)
+                    // Guarda en la nube de Firebase y abre WhatsApp con el número 5545256011
                     db.collection("orders").add({
                         date: new Date().toLocaleString(),
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
@@ -638,7 +618,6 @@
                         profit: profit,
                         completed: false
                     }).then(() => {
-                        // Abrir WhatsApp una vez guardado con éxito
                         let encoded = encodeURIComponent(message);
                         window.open(`https://wa.me/525545256011?text=${encoded}`, '_blank');
                     }).catch((error) => {
