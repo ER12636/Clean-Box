@@ -8,6 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Alpine.js CDN -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -292,18 +295,18 @@
                     <!-- Pestaña 2: Historial de Pedidos -->
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos Realizados</h4>
-                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
+                            <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos en la Nube (Sincronizado)</h4>
+                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial local/nube</button>
                         </div>
 
                         <template x-if="orders.length === 0">
                             <div class="py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                <p class="text-sm">Aún no hay pedidos registrados en este dispositivo.</p>
+                                <p class="text-sm">Aún no hay pedidos registrados o cargando desde Firebase...</p>
                             </div>
                         </template>
 
                         <div class="space-y-4">
-                            <template x-for="(order, index) in orders" :key="index">
+                            <template x-for="(order, index) in orders" :key="order.id || index">
                                 <div :class="order.completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'" class="border rounded-xl p-4 space-y-3 transition">
                                     <div class="flex justify-between items-start">
                                         <div>
@@ -311,25 +314,25 @@
                                                 <span class="text-xs font-bold text-blue-600 uppercase" x-text="'Pedido #' + (orders.length - index)"></span>
                                                 <span :class="order.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" class="text-[10px] font-bold px-2 py-0.5 rounded-full" x-text="order.completed ? '✓ Completado' : '⏳ Pendiente'"></span>
                                             </div>
-                                            <h5 class="font-bold text-slate-800 text-sm mt-1" x-text="'Cliente: ' + order.customer.nombre"></h5>
+                                            <h5 class="font-bold text-slate-800 text-sm mt-1" x-text="'Cliente: ' + (order.customer ? order.customer.nombre : 'Sin nombre')"></h5>
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <span class="text-xs text-slate-400" x-text="order.date"></span>
-                                            <button @click="toggleOrderStatus(index)" :class="order.completed ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm" x-text="order.completed ? 'Marcar Pendiente' : '✓ Pedido Completado'"></button>
+                                            <button @click="toggleOrderStatus(order)" :class="order.completed ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm" x-text="order.completed ? 'Marcar Pendiente' : '✓ Pedido Completado'"></button>
                                         </div>
                                     </div>
 
                                     <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-100">
-                                        <div><strong>Dirección de Entrega:</strong> <span class="text-blue-700 font-medium" x-text="order.customer.calleNum + (order.customer.apto ? ' (Apto: ' + order.customer.apto + ')' : '') + ', Col. ' + order.customer.colonia + ', ' + order.customer.ciudad + ', ' + order.customer.estado + ' (C.P. ' + order.customer.cp + ')'"></span></div>
-                                        <div><strong>Total Venta:</strong> <span class="font-bold text-blue-600" x-text="'$' + order.total.toFixed(2)"></span></div>
-                                        <div><strong>Costo Total (Insumos + Envases):</strong> <span class="text-slate-600" x-text="'$' + order.cogs.toFixed(2)"></span></div>
-                                        <div><strong>Ganancia del Pedido:</strong> <span class="font-bold text-emerald-600" x-text="'$' + order.profit.toFixed(2) + ' (' + ((order.profit/order.total)*100).toFixed(1) + '%)'"></span></div>
+                                        <div><strong>Dirección de Entrega:</strong> <span class="text-blue-700 font-medium" x-text="(order.customer ? order.customer.calleNum : '') + (order.customer && order.customer.apto ? ' (Apto: ' + order.customer.apto + ')' : '') + ', Col. ' + (order.customer ? order.customer.colonia : '') + ', ' + (order.customer ? order.customer.ciudad : '') + ', ' + (order.customer ? order.customer.estado : '') + ' (C.P. ' + (order.customer ? order.customer.cp : '') + ')'"></span></div>
+                                        <div><strong>Total Venta:</strong> <span class="font-bold text-blue-600" x-text="'$' + (order.total || 0).toFixed(2)"></span></div>
+                                        <div><strong>Costo Total (Insumos + Envases):</strong> <span class="text-slate-600" x-text="'$' + (order.cogs || 0).toFixed(2)"></span></div>
+                                        <div><strong>Ganancia del Pedido:</strong> <span class="font-bold text-emerald-600" x-text="'$' + (order.profit || 0).toFixed(2) + ' (' + (((order.profit || 0)/(order.total || 1))*100).toFixed(1) + '%)'"></span></div>
                                     </div>
 
                                     <div class="text-xs text-slate-600">
                                         <strong>Productos Solicitados:</strong>
                                         <div class="flex flex-wrap gap-1 mt-1">
-                                            <template x-for="item in order.items">
+                                            <template x-for="item in (order.items || [])">
                                                 <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md" x-text="item.name + ' (' + item.qty + ' ' + (item.unit === 'barra' ? 'barras' : item.unit) + ') - Venta: $' + item.subtotal.toFixed(2) + ' | Ganancia: $' + item.profit.toFixed(2)"></span>
                                             </template>
                                         </div>
@@ -346,6 +349,22 @@
 
     <!-- ALPINE.JS LOGIC -->
     <script>
+        // CONFIGURACIÓN DE FIREBASE (Reemplaza estos datos con los de tu consola de Firebase)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY_DE_FIREBASE",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "tu-messaging-sender-id",
+            appId: "tu-app-id"
+        };
+
+        // Inicializar Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+
         function cleanBoxApp() {
             return {
                 targetMargin: 0.40, 
@@ -449,15 +468,15 @@
                         this.targetMargin = parseFloat(savedMargin);
                     }
 
-                    // Cargar pedidos guardados en el navegador para que no se pierdan al actualizar
-                    let savedOrders = localStorage.getItem('cleanbox_orders');
-                    if (savedOrders) {
-                        try {
-                            this.orders = JSON.parse(savedOrders);
-                        } catch(e) {
-                            this.orders = [];
-                        }
-                    }
+                    // Sincronizar pedidos en tiempo real desde Firebase Firestore para TODOS los dispositivos
+                    db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                        this.orders = snapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                    }, (error) => {
+                        console.error("Error al sincronizar con Firebase:", error);
+                    });
 
                     this.products.forEach(p => {
                         this.cart[p.id] = 0;
@@ -469,7 +488,6 @@
                 },
 
                 calculatePrice(product) {
-                    // Si es Barra Zote (id: 1), su precio fijo de venta es $25.00
                     if (product.id === 1) {
                         return 25.00;
                     }
@@ -541,15 +559,22 @@
                     }
                 },
 
-                toggleOrderStatus(index) {
-                    this.orders[index].completed = !this.orders[index].completed;
-                    localStorage.setItem('cleanbox_orders', JSON.stringify(this.orders));
+                toggleOrderStatus(order) {
+                    // Actualiza el estado directamente en Firebase (sincronizado en todos los dispositivos)
+                    db.collection("orders").doc(order.id).update({
+                        completed: !order.completed
+                    }).catch(error => {
+                        alert("Error al actualizar el estado: " + error.message);
+                    });
                 },
 
                 clearOrders() {
-                    if (confirm('¿Estás seguro de limpiar todo el historial de pedidos?')) {
-                        this.orders = [];
-                        localStorage.removeItem('cleanbox_orders');
+                    if (confirm('¿Estás seguro de eliminar todos los pedidos de la base de datos?')) {
+                        db.collection("orders").get().then((querySnapshot) => {
+                            querySnapshot.forEach((doc) => {
+                                doc.ref.delete();
+                            });
+                        });
                     }
                 },
 
@@ -600,23 +625,25 @@
                     }
                     message += `\n¡Quedo a la espera de la confirmación de entrega!`;
 
-                    // Guardar en Historial del Dueño y persistir en localStorage
                     let profit = this.totalSaleAmount - totalCogs;
-                    this.orders.unshift({
+
+                    // Guardar directamente en la base de datos de Firebase (Nube en tiempo real)
+                    db.collection("orders").add({
                         date: new Date().toLocaleString(),
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         customer: { ...this.customer },
                         items: orderItems,
                         total: this.totalSaleAmount,
                         cogs: totalCogs,
                         profit: profit,
                         completed: false
+                    }).then(() => {
+                        // Abrir WhatsApp una vez guardado con éxito
+                        let encoded = encodeURIComponent(message);
+                        window.open(`https://wa.me/525545256011?text=${encoded}`, '_blank');
+                    }).catch((error) => {
+                        alert("Hubo un error al registrar el pedido en la nube: " + error.message);
                     });
-
-                    localStorage.setItem('cleanbox_orders', JSON.stringify(this.orders));
-
-                    // Abrir WhatsApp
-                    let encoded = encodeURIComponent(message);
-                    window.open(`https://wa.me/525545256011?text=${encoded}`, '_blank');
                 }
             }
         }
