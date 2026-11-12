@@ -8,7 +8,6 @@
 <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
@@ -82,19 +81,10 @@ body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
 
   <template x-if="!ownerAuthorized">
    <div class="py-8 text-center max-w-sm mx-auto space-y-4">
-    <span class="text-4xl">🔐</span><h3 class="font-bold text-slate-700">Verificación del propietario</h3>
-    <template x-if="!phoneVerified">
-     <div class="space-y-3">
-      <p class="text-sm text-slate-500">Verifica el teléfono autorizado para recibir un código SMS.</p><p class="font-semibold text-blue-700">+52 554 525 6011</p>
-      <div id="recaptcha-container" class="flex justify-center"></div>
-      <button @click="sendSMS()" :disabled="smsSending" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl disabled:opacity-50" x-text="smsSending?'Enviando SMS...':'Enviar código SMS'"></button>
-      <input x-model="smsCode" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" class="w-full text-center px-4 py-2 border rounded-xl">
-      <button @click="verifySMS()" :disabled="!confirmationResult" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl disabled:opacity-50">Verificar código</button>
-     </div>
-    </template>
-    <template x-if="phoneVerified">
-     <div class="space-y-3"><p class="text-sm text-emerald-700 font-semibold">✓ Teléfono verificado. Ingresa tu contraseña.</p><input type="password" x-model="pinInput" @keyup.enter="authorizeOwner()" placeholder="Contraseña de administrador" class="w-full text-center px-4 py-2 border rounded-xl"><button @click="authorizeOwner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl">Acceder al panel</button></div>
-    </template>
+    <span class="text-4xl">🔐</span><h3 class="font-bold text-slate-700">Acceso del propietario</h3>
+    <p class="text-sm text-slate-500">Ingresa tu contraseña para abrir el panel de control.</p>
+    <input type="password" x-model="pinInput" @keyup.enter="authorizeOwner()" placeholder="Contraseña de administrador" class="w-full text-center px-4 py-2 border rounded-xl">
+    <button @click="authorizeOwner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl">Acceder al panel</button>
     <p class="text-xs text-rose-600" x-text="authMessage" x-show="authMessage"></p>
    </div>
   </template>
@@ -103,8 +93,8 @@ body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
    <div class="space-y-6">
     <div class="flex justify-between items-center"><div class="flex gap-2 border-b pb-3"><button @click="ownerTab='margen'" :class="ownerTab==='margen'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">⚙️ Margen y Costos</button></div><button @click="logoutOwner()" class="text-xs text-rose-600 underline">Cerrar sesión</button></div>
     <section x-show="ownerTab==='margen'" class="space-y-5">
-     <div class="bg-blue-50 border p-4 rounded-xl flex items-center justify-between"><div><h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo (Sincronizado)</h4><p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p></div><div class="text-2xl font-bold text-blue-600" x-text="(targetMargin*100).toFixed(0)+'%'"></div></div>
-     <div><label class="block text-xs font-semibold mb-2">Desliza para cambiar margen (30% al 60%):</label><input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @change="saveMargin()" class="w-full accent-blue-600"></div>
+     <div class="bg-blue-50 border p-4 rounded-xl flex items-center justify-between"><div><h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo</h4><p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p></div><div class="text-2xl font-bold text-blue-600" x-text="(targetMargin*100).toFixed(0)+'%'"></div></div>
+     <div><label class="block text-xs font-semibold mb-2">Desliza para cambiar margen (30% al 60%). Al volver a entrar se restablece al 30%:</label><input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @change="saveMargin()" class="w-full accent-blue-600"></div>
      <div class="overflow-x-auto border rounded-xl"><table class="w-full text-left text-xs"><thead class="bg-slate-50 uppercase"><tr><th class="p-3">Producto</th><th class="p-3">Costo Insumo</th><th class="p-3">Costo Envase</th><th class="p-3">Costo Total</th><th class="p-3">Precio Venta</th><th class="p-3">Ganancia</th></tr></thead><tbody class="divide-y"><template x-for="p in products" :key="'cost'+p.id"><tr><td class="p-3 font-semibold" x-text="p.name"></td><td class="p-3" x-text="'$'+p.baseCost.toFixed(2)"></td><td class="p-3" x-text="'$'+p.bottleCost.toFixed(2)"></td><td class="p-3" x-text="'$'+(p.baseCost+p.bottleCost).toFixed(2)"></td><td class="p-3 font-bold text-blue-600" x-text="'$'+calculatePrice(p).toFixed(2)"></td><td class="p-3 text-emerald-600" x-text="'$'+(calculatePrice(p)-p.baseCost-p.bottleCost).toFixed(2)"></td></tr></template></tbody></table></div>
     </section>
    </div>
@@ -123,15 +113,15 @@ const firebaseConfig={
  measurementId:"G-2612KRSBP3"
 };
 const firebaseConfigured=!!(firebaseConfig.apiKey&&firebaseConfig.projectId&&firebaseConfig.appId);
-let db=null,auth=null;
+let db=null;
 if(firebaseConfigured){
- try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);db=firebase.firestore();auth=firebase.auth();auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(console.error);}
+ try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);db=firebase.firestore();}
  catch(e){console.error("Error al iniciar Firebase:",e);}
 }
 
 function cleanBoxApp(){
  return {
-  targetMargin:0.40,openOwnerModal:false,ownerAuthorized:false,phoneVerified:false,pinInput:"",smsCode:"",smsSending:false,authMessage:"",confirmationResult:null,recaptchaVerifier:null,recaptchaWidgetId:null,ownerTab:"margen",searchQuery:"",selectedCategory:"todos",showSelectedList:false,showAddressForm:false,orders:[],ordersUnsubscribe:null,marginUnsubscribe:null,
+  targetMargin:0.30,openOwnerModal:false,ownerAuthorized:false,pinInput:"",authMessage:"",ownerTab:"margen",searchQuery:"",selectedCategory:"todos",showSelectedList:false,showAddressForm:false,orders:[],ordersUnsubscribe:null,
   customer:{nombre:"",cp:"",estado:"",ciudad:"",colonia:"",calleNum:"",apto:""},
   categories:["ropa","limpieza","cremas sólidas","cremas líquidas","shampoo de manos","otros shampoos","auto","aromatizantes","desengrasantes"],
   products:[
@@ -187,58 +177,18 @@ function cleanBoxApp(){
   cart:{},
   init(){
    this.products.forEach(p=>this.cart[p.id]=0);
-   if(!db||!auth){console.error("Firebase no está disponible.");return;}
-   this.marginUnsubscribe=db.collection("settings").doc("config").onSnapshot(doc=>{if(doc.exists&&typeof doc.data().targetMargin==="number")this.targetMargin=Math.min(.6,Math.max(.3,doc.data().targetMargin));},e=>console.error("Margen:",e));
-   auth.onAuthStateChanged(user=>{
-    this.stopOrdersListener();
-    this.orders=[];
-    this.phoneVerified=!!(user&&user.phoneNumber==="+525545256011");
-    this.ownerAuthorized=false;
-    this.pinInput="";
-    if(user&&!this.phoneVerified){auth.signOut().catch(console.error);}
-    
-   });
-  },
-  async ensureRecaptcha(){
-   if(!auth)throw new Error("Firebase Authentication no está disponible.");
-   if(this.recaptchaVerifier){try{await this.recaptchaVerifier.render();return;}catch(e){this.recaptchaVerifier.clear();this.recaptchaVerifier=null;}}
-   this.recaptchaVerifier=new firebase.auth.RecaptchaVerifier("recaptcha-container",{size:"normal",callback:()=>{this.authMessage="Verificación completada. Ahora pulsa Enviar código SMS.";}, "expired-callback":()=>{this.authMessage="La verificación expiró. Vuelve a marcar el reCAPTCHA.";}});
-   this.recaptchaWidgetId=await this.recaptchaVerifier.render();
-  },
-  async sendSMS(){
-   this.authMessage="";
-   if(!auth){this.authMessage="Firebase no está disponible.";return;}
-   this.smsSending=true;
-   try{
-    await this.ensureRecaptcha();
-    this.confirmationResult=await auth.signInWithPhoneNumber("+525545256011",this.recaptchaVerifier);
-    this.authMessage="Código enviado. Revisa los mensajes SMS de tu teléfono.";
-   }catch(e){console.error(e);this.authMessage="No se pudo enviar el SMS: "+(e.message||e);}
-   finally{this.smsSending=false;}
-  },
-  async verifySMS(){
-   this.authMessage="";
-   if(!this.confirmationResult){this.authMessage="Primero solicita el código SMS.";return;}
-   if(!/^\d{6}$/.test(this.smsCode)){this.authMessage="Escribe el código de 6 dígitos.";return;}
-   try{
-    const result=await this.confirmationResult.confirm(this.smsCode.trim());
-    if(!result.user||result.user.phoneNumber!=="+525545256011"){await auth.signOut();this.phoneVerified=false;this.authMessage="El teléfono verificado no es el autorizado.";return;}
-    this.phoneVerified=true;this.authMessage="Teléfono verificado. Ahora escribe tu contraseña.";
-    if(this.recaptchaVerifier){this.recaptchaVerifier.clear();this.recaptchaVerifier=null;}
-   }catch(e){console.error(e);this.authMessage="Código incorrecto o vencido. "+(e.message||"Inténtalo nuevamente.");}
+   // El margen comienza en 30% cada vez que se carga la página.
+   this.targetMargin=0.30;
+   this.orders=[];
   },
   authorizeOwner(){
-   if(!this.phoneVerified||!auth.currentUser||auth.currentUser.phoneNumber!=="+525545256011"){this.authMessage="Primero verifica el teléfono autorizado por SMS.";return;}
    if(this.pinInput==="niko10emma17"){this.ownerAuthorized=true;this.ownerTab="margen";this.authMessage="";}
    else{this.authMessage="Contraseña incorrecta.";}
   },
-  stopOrdersListener(){if(this.ordersUnsubscribe){this.ordersUnsubscribe();this.ordersUnsubscribe=null;}},
   closeOwnerPanel(){this.openOwnerModal=false;this.ownerAuthorized=false;this.pinInput="";},
-  async logoutOwner(){this.ownerAuthorized=false;this.phoneVerified=false;this.pinInput="";this.smsCode="";this.confirmationResult=null;this.stopOrdersListener();this.orders=[];if(auth)try{await auth.signOut();}catch(e){console.error(e);}},
-  async saveMargin(){
-   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("Verifica tu teléfono e ingresa al panel.");return;}
-   try{await db.collection("settings").doc("config").set({targetMargin:this.targetMargin},{merge:true});}
-   catch(e){console.error(e);alert("No se pudo guardar el margen: "+e.message);}
+  logoutOwner(){this.ownerAuthorized=false;this.pinInput="";this.authMessage="";},
+  saveMargin(){
+   // El cambio se aplica durante esta visita; al recargar vuelve a 30%.
   },
   calculatePrice(p){if(p.id===1)return 25;return(p.baseCost+p.bottleCost)/(1-this.targetMargin);},
   updateCart(p,n){this.cart[p.id]=Math.max(0,Number(((this.cart[p.id]||0)+n).toFixed(2)));},
@@ -251,12 +201,12 @@ function cleanBoxApp(){
   get totalSavings(){return Math.max(0,this.products.reduce((s,p)=>s+(p.supermarketPrice-this.calculatePrice(p))*(Number(this.cart[p.id])||0),0));},
   formatAddress(c){if(!c)return"Sin dirección";return[c.calleNum,c.apto?"Apto: "+c.apto:"",c.colonia?"Col. "+c.colonia:"",c.ciudad,c.estado,c.cp?"C.P. "+c.cp:""].filter(Boolean).join(", ");},
   async toggleOrderStatus(order){
-   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("No tienes autorización.");return;}
+   if(!this.ownerAuthorized||!db){alert("No tienes autorización.");return;}
    try{await db.collection("orders").doc(order.id).update({completed:!order.completed});}
    catch(e){alert("Error al actualizar: "+e.message);}
   },
   async clearOrders(){
-   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("No tienes autorización.");return;}
+   if(!this.ownerAuthorized||!db){alert("No tienes autorización.");return;}
    if(!confirm("¿Estás seguro de eliminar todos los pedidos? Esta acción no se puede deshacer."))return;
    try{const snap=await db.collection("orders").get();for(let i=0;i<snap.docs.length;i+=450){const batch=db.batch();snap.docs.slice(i,i+450).forEach(d=>batch.delete(d.ref));await batch.commit();}}
    catch(e){alert("No se pudieron eliminar los pedidos: "+e.message);}
