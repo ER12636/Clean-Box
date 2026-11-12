@@ -101,20 +101,11 @@ body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
 
   <template x-if="ownerAuthorized">
    <div class="space-y-6">
-    <div class="flex justify-between items-center"><div class="flex gap-2 border-b pb-3"><button @click="ownerTab='margen'" :class="ownerTab==='margen'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">⚙️ Margen y Costos</button><button @click="ownerTab='historial'" :class="ownerTab==='historial'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">📋 Pedidos y Ganancias</button></div><button @click="logoutOwner()" class="text-xs text-rose-600 underline">Cerrar sesión</button></div>
+    <div class="flex justify-between items-center"><div class="flex gap-2 border-b pb-3"><button @click="ownerTab='margen'" :class="ownerTab==='margen'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">⚙️ Margen y Costos</button></div><button @click="logoutOwner()" class="text-xs text-rose-600 underline">Cerrar sesión</button></div>
     <section x-show="ownerTab==='margen'" class="space-y-5">
      <div class="bg-blue-50 border p-4 rounded-xl flex items-center justify-between"><div><h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo (Sincronizado)</h4><p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p></div><div class="text-2xl font-bold text-blue-600" x-text="(targetMargin*100).toFixed(0)+'%'"></div></div>
      <div><label class="block text-xs font-semibold mb-2">Desliza para cambiar margen (30% al 60%):</label><input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @change="saveMargin()" class="w-full accent-blue-600"></div>
      <div class="overflow-x-auto border rounded-xl"><table class="w-full text-left text-xs"><thead class="bg-slate-50 uppercase"><tr><th class="p-3">Producto</th><th class="p-3">Costo Insumo</th><th class="p-3">Costo Envase</th><th class="p-3">Costo Total</th><th class="p-3">Precio Venta</th><th class="p-3">Ganancia</th></tr></thead><tbody class="divide-y"><template x-for="p in products" :key="'cost'+p.id"><tr><td class="p-3 font-semibold" x-text="p.name"></td><td class="p-3" x-text="'$'+p.baseCost.toFixed(2)"></td><td class="p-3" x-text="'$'+p.bottleCost.toFixed(2)"></td><td class="p-3" x-text="'$'+(p.baseCost+p.bottleCost).toFixed(2)"></td><td class="p-3 font-bold text-blue-600" x-text="'$'+calculatePrice(p).toFixed(2)"></td><td class="p-3 text-emerald-600" x-text="'$'+(calculatePrice(p)-p.baseCost-p.bottleCost).toFixed(2)"></td></tr></template></tbody></table></div>
-    </section>
-    <section x-show="ownerTab==='historial'" class="space-y-4">
-     <div class="flex justify-between items-center"><h4 class="font-bold text-sm">Registro de Pedidos en la Nube</h4><button @click="clearOrders()" class="text-xs text-rose-600 underline">Limpiar historial</button></div>
-     <template x-if="orders.length===0"><div class="py-10 text-center text-slate-400 bg-slate-50 rounded-xl">Aún no hay pedidos registrados.</div></template>
-     <template x-for="(order,index) in orders" :key="order.id"><article class="border rounded-xl p-4 space-y-3" :class="order.completed?'bg-emerald-50/50 border-emerald-200':'bg-slate-50 border-slate-200'">
-      <div class="flex flex-wrap justify-between gap-2"><div><span class="text-xs font-bold text-blue-600" x-text="'Pedido #'+(orders.length-index)"></span><span class="ml-2 text-xs font-bold" x-text="order.completed?'✓ Completado':'⏳ Pendiente'"></span><h5 class="font-bold text-sm mt-1" x-text="'Cliente: '+(order.customer?.nombre||'Sin nombre')"></h5></div><div class="flex gap-2 items-center"><span class="text-xs text-slate-400" x-text="order.date"></span><button @click="toggleOrderStatus(order)" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500 text-white" x-text="order.completed?'Marcar Pendiente':'✓ Pedido Completado'"></button></div></div>
-      <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg"><div class="md:col-span-2"><strong>Dirección:</strong> <span x-text="formatAddress(order.customer)"></span></div><div><strong>Total venta:</strong> <span class="text-blue-600 font-bold" x-text="'$'+Number(order.total||0).toFixed(2)"></span></div><div><strong>Costo total:</strong> <span x-text="'$'+Number(order.cogs||0).toFixed(2)"></span></div><div><strong>Ganancia:</strong> <span class="text-emerald-600 font-bold" x-text="'$'+Number(order.profit||0).toFixed(2)"></span></div></div>
-      <div class="text-xs"><strong>Productos:</strong><div class="flex flex-wrap gap-1 mt-1"><template x-for="(item,i) in (order.items||[])" :key="i"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md" x-text="item.name+' ('+item.qty+' '+(item.unit==='barra'?'barras':item.unit)+') - Venta: $'+Number(item.subtotal||0).toFixed(2)+' | Ganancia: $'+Number(item.profit||0).toFixed(2)"></span></template></div></div>
-     </article></template>
     </section>
    </div>
   </template>
@@ -123,7 +114,7 @@ body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
 
 <script>
 const firebaseConfig={
- apiKey:"AIzaSyBuE3rzGblnCVgpsGXafFH-GX06BYl0dms",
+ apiKey:"AIzaSyBuE3rzGblNcvgpsGXafFH-GX06BYl0dms",
  authDomain:"cleanbox-f7a62.firebaseapp.com",
  projectId:"cleanbox-f7a62",
  storageBucket:"cleanbox-f7a62.firebasestorage.app",
@@ -205,7 +196,7 @@ function cleanBoxApp(){
     this.ownerAuthorized=false;
     this.pinInput="";
     if(user&&!this.phoneVerified){auth.signOut().catch(console.error);}
-    if(this.phoneVerified)this.startOrdersListener();
+    
    });
   },
   async ensureRecaptcha(){
@@ -240,10 +231,6 @@ function cleanBoxApp(){
    if(!this.phoneVerified||!auth.currentUser||auth.currentUser.phoneNumber!=="+525545256011"){this.authMessage="Primero verifica el teléfono autorizado por SMS.";return;}
    if(this.pinInput==="niko10emma17"){this.ownerAuthorized=true;this.ownerTab="margen";this.authMessage="";}
    else{this.authMessage="Contraseña incorrecta.";}
-  },
-  startOrdersListener(){
-   if(!db||!auth.currentUser||auth.currentUser.phoneNumber!=="+525545256011")return;
-   this.ordersUnsubscribe=db.collection("orders").orderBy("timestamp","desc").onSnapshot(s=>{this.orders=s.docs.map(d=>({id:d.id,...d.data()}));},e=>{console.error("Pedidos:",e);this.authMessage="No se pudieron cargar los pedidos: "+e.message;});
   },
   stopOrdersListener(){if(this.ordersUnsubscribe){this.ordersUnsubscribe();this.ordersUnsubscribe=null;}},
   closeOwnerPanel(){this.openOwnerModal=false;this.ownerAuthorized=false;this.pinInput="";},
@@ -283,7 +270,7 @@ function cleanBoxApp(){
    const orderItems=[];let totalCogs=0;
    this.products.forEach(p=>{const qty=Number(this.cart[p.id])||0;if(qty>0){const subtotal=Number((this.calculatePrice(p)*qty).toFixed(2));const cogs=Number(((p.baseCost+p.bottleCost)*qty).toFixed(2));totalCogs+=cogs;const profit=Number((subtotal-cogs).toFixed(2));msg+=`- ${p.name}: ${qty} ${p.unit==="barra"?"barras":p.unit} ($${subtotal.toFixed(2)})\n`;orderItems.push({name:p.name,qty,unit:p.unit,subtotal,profit});}});
    msg+=`\n💰 *Total Venta:* $${total.toFixed(2)}\n🚚 *Envío:* ${total>=700?"¡GRATIS (Compra mayor a $700)!":"Estándar"}\n\n¡Quedo a la espera de la confirmación de entrega!`;
-   const wa=window.open("https://wa.me/5215545256011?text="+encodeURIComponent(msg),"_blank");
+   const wa=window.open("https://wa.me/525545256011?text="+encodeURIComponent(msg),"_blank");
    if(!wa){alert("El navegador bloqueó WhatsApp. Permite las ventanas emergentes e inténtalo de nuevo.");return;}
    if(!db){alert("WhatsApp se abrió, pero Firebase no está disponible para guardar el pedido.");return;}
    const order={date:new Date().toLocaleString("es-MX"),timestamp:firebase.firestore.FieldValue.serverTimestamp(),customer:{...this.customer},items:orderItems,total,cogs:Number(totalCogs.toFixed(2)),profit:Number((total-totalCogs).toFixed(2)),completed:false};
