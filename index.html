@@ -1,672 +1,298 @@
-<!DOCTYPE html>
+
+  <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clean Box - Productos de Limpieza y Aseo a Domicilio</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js CDN -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Firebase SDK Compat -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Poppins', sans-serif; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clean Box - Productos de Limpieza y Aseo a Domicilio</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Poppins',sans-serif}[x-cloak]{display:none!important}
+</style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased pb-32" x-data="cleanBoxApp()">
+<body class="bg-slate-50 text-slate-800 antialiased pb-36" x-data="cleanBoxApp()" x-init="init()">
 
-    <!-- Header / Navbar -->
-    <header class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="flex items-center space-x-2">
-                <span class="text-2xl font-bold tracking-tight">🧹 Clean Box</span>
-                <span class="hidden sm:inline-block bg-blue-700 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Calidad a Domicilio</span>
-            </div>
-            
-            <div class="flex items-center space-x-3">
-                <div class="hidden md:flex items-center bg-blue-700 text-xs px-3 py-1.5 rounded-lg border border-blue-500 font-medium shadow-sm">
-                    <span class="mr-1.5">🚚</span>
-                    <span>Envío Gratis en compras mayores a <strong>$700</strong></span>
-                </div>
-                
-                <button @click="openOwnerModal = true" class="bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition border border-blue-500 flex items-center shadow-sm">
-                    <span class="mr-1">🔒</span> Panel Dueño
-                </button>
-            </div>
-        </div>
-        <div class="md:hidden bg-blue-700 text-center text-xs py-1 px-2 border-t border-blue-500 font-medium">
-            🚚 Envío Gratis en compras mayores a <strong>$700</strong>
-        </div>
-    </header>
+<header class="bg-blue-600 text-white shadow-md sticky top-0 z-40">
+ <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+  <div class="flex items-center space-x-2"><span class="text-2xl font-bold tracking-tight">🧹 Clean Box</span><span class="hidden sm:inline-block bg-blue-700 text-xs px-2 py-1 rounded-full uppercase tracking-wider font-semibold">Calidad a Domicilio</span></div>
+  <div class="flex items-center space-x-3">
+   <div class="hidden md:flex items-center bg-blue-700 text-xs px-3 py-1.5 rounded-lg border border-blue-500 font-medium shadow-sm"><span class="mr-1.5">🚚</span><span>Envío Gratis en compras mayores a <strong>$700</strong></span></div>
+   <button @click="openOwnerModal=true" class="bg-blue-700 hover:bg-blue-800 px-3 py-1.5 rounded-lg text-xs font-semibold tracking-wide transition border border-blue-500 flex items-center shadow-sm">🔒 Panel Dueño</button>
+  </div>
+ </div>
+ <div class="md:hidden bg-blue-700 text-center text-xs py-1 px-2 border-t border-blue-500 font-medium">🚚 Envío Gratis en compras mayores a <strong>$700</strong></div>
+</header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-6">
+<main class="max-w-7xl mx-auto px-4 py-6">
+ <section class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl text-white p-6 md:p-8 mb-8 relative overflow-hidden">
+  <div class="absolute right-0 bottom-0 opacity-10 pointer-events-none"><span class="text-9xl">💧</span></div>
+  <div class="relative z-10 max-w-2xl"><span class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ahorra hasta un 50%</span>
+   <h1 class="text-2xl md:text-4xl font-bold mt-3 mb-2">Surtido Inteligente de Limpieza y Cuidado</h1>
+   <p class="text-blue-100 text-sm md:text-base mb-4 leading-relaxed">Arma tu pedido eligiendo tus litros, piezas y presentaciones favoritas. ¡Calidad superior al mejor precio directo en tu hogar!</p>
+   <button @click="clearCart()" class="bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition border border-white/20">🗑️ Vaciar Selección</button>
+  </div>
+ </section>
 
-        <!-- Hero Section -->
-        <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl shadow-xl text-white p-6 md:p-8 mb-8 relative overflow-hidden">
-            <div class="absolute right-0 bottom-0 opacity-10 transform translate-x-8 translate-y-8 pointer-events-none">
-                <span class="text-9xl">💧</span>
-            </div>
-            <div class="relative z-10 max-w-2xl">
-                <span class="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Ahorra hasta un 50%</span>
-                <h1 class="text-2xl md:text-4xl font-bold mt-3 mb-2">Surtido Inteligente de Limpieza y Cuidado</h1>
-                <p class="text-blue-100 text-sm md:text-base mb-4 leading-relaxed">
-                    Arma tu pedido eligiendo tus litros, piezas y presentaciones favoritas. ¡Calidad superior al mejor precio directo en tu hogar!
-                </p>
-                <div class="flex flex-wrap items-center gap-4">
-                    <button @click="clearCart()" class="bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition border border-white/20">
-                        🗑️ Vaciar Selección
-                    </button>
-                </div>
-            </div>
-        </div>
+ <section class="mb-6 space-y-4">
+  <div class="relative max-w-md mx-auto md:mx-0"><span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">🔍</span><input type="text" x-model="searchQuery" placeholder="Buscar producto por nombre (ej. Crema, Shampoo, Cloro)..." class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"></div>
+  <div class="flex overflow-x-auto pb-2 space-x-2">
+   <button @click="selectedCategory='todos'" :class="selectedCategory==='todos'?'bg-blue-600 text-white shadow-md':'bg-white text-slate-600 border border-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap">Todos los Productos</button>
+   <template x-for="cat in categories" :key="cat"><button @click="selectedCategory=cat" :class="selectedCategory===cat?'bg-blue-600 text-white shadow-md':'bg-white text-slate-600 border border-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap capitalize" x-text="cat"></button></template>
+  </div>
+ </section>
 
-        <!-- BARRA DE BÚSQUEDA Y FILTROS -->
-        <div class="mb-6 space-y-4">
-            <div class="relative max-w-md mx-auto md:mx-0">
-                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                    🔍
-                </span>
-                <input type="text" x-model="searchQuery" placeholder="Buscar producto por nombre (ej. Crema, Shampoos, Cloro, Zote)..." 
-                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-            </div>
-
-            <!-- Categorías -->
-            <div class="flex overflow-x-auto pb-2 space-x-2 scrollbar-none">
-                <button @click="selectedCategory = 'todos'" 
-                    :class="selectedCategory === 'todos' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-                    class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition">
-                    Todos los Productos
-                </button>
-                <template x-for="cat in categories" :key="cat">
-                    <button @click="selectedCategory = cat" 
-                        :class="selectedCategory === cat ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'"
-                        class="px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition capitalize" 
-                        x-text="cat">
-                    </button>
-                </template>
-            </div>
-        </div>
-
-        <!-- PRODUCT GRID -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <template x-for="product in filteredProducts" :key="product.id">
-                <div class="bg-white rounded-2xl shadow-sm hover:shadow-md transition border border-slate-200 p-4 flex flex-col justify-between relative group">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] font-bold uppercase px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md tracking-wider capitalize" x-text="product.category"></span>
-                            <span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full" x-text="product.badge"></span>
-                        </div>
-                        <h3 class="font-bold text-slate-800 text-base mb-1" x-text="product.name"></h3>
-                        <p class="text-xs text-slate-500 mb-3" x-text="product.description"></p>
-                    </div>
-
-                    <div>
-                        <div class="space-y-2 mt-2">
-                            <template x-if="product.unit === 'barra'">
-                                <div class="flex items-center space-x-2">
-                                    <button @click="updateCart(product, -1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
-                                    <input type="number" step="1" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                    <span class="text-xs font-medium text-slate-500">barras</span>
-                                    <button @click="updateCart(product, 1)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
-                                </div>
-                            </template>
-                            <template x-if="product.unit !== 'barra'">
-                                <div class="space-y-2">
-                                    <div class="flex items-center space-x-2">
-                                        <button @click="updateCart(product, -0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">-</button>
-                                        <input type="number" step="0.5" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                        <span class="text-xs font-medium text-slate-500" x-text="product.unit"></span>
-                                        <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
-                                    </div>
-                                    <div class="flex gap-1.5 pt-1">
-                                        <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
-                                        <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
-                                        <button @click="setCartQty(product, 1)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">1L</button>
-                                    </div>
-                                </div>
-                            </template>
-
-                            <button @click="cart[product.id] = 0" x-show="cart[product.id] > 0" class="w-full mt-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-1.5 rounded-lg transition border border-rose-200 flex items-center justify-center space-x-1">
-                                <span>🗑️ Quitar de mi lista</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </div>
-
-    </main>
-
-    <!-- FLOATING CART / CHECKOUT BAR -->
-    <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-4 py-3">
-            
-            <div class="mb-2 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
-                <button @click="showSelectedList = !showSelectedList" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
-                    <div class="flex items-center space-x-2">
-                        <span>📋 Ver lista de productos seleccionados</span>
-                        <span class="bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px]" x-text="activeItemsCount"></span>
-                    </div>
-                    <span class="text-sm font-bold" x-text="showSelectedList ? '▲ Ocultar' : '▼ Mostrar'"></span>
-                </button>
-                
-                <div x-show="showSelectedList" class="p-2.5 max-h-28 overflow-y-auto space-y-1.5" x-cloak>
-                    <template x-if="activeItemsCount === 0">
-                        <p class="text-xs text-slate-400 italic text-center py-1">Aún no has agregado productos a tu lista.</p>
-                    </template>
-                    <div class="flex flex-wrap gap-1.5">
-                        <template x-for="product in products" :key="'chip-' + product.id">
-                            <template x-if="cart[product.id] > 0">
-                                <div class="inline-flex items-center bg-white border border-slate-200 rounded-lg px-2.5 py-1 text-xs shadow-xs space-x-2">
-                                    <span class="font-medium text-slate-800" x-text="product.name + ' (' + cart[product.id] + ' ' + (product.unit === 'barra' ? 'barras' : product.unit) + ')'"></span>
-                                    <span class="text-blue-600 font-bold" x-text="'$' + (calculatePrice(product) * cart[product.id]).toFixed(2)"></span>
-                                    <button @click="cart[product.id] = 0" class="text-rose-500 hover:text-rose-700 font-bold ml-1">×</button>
-                                </div>
-                            </template>
-                        </template>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mb-2 bg-blue-50/70 border border-blue-100 rounded-xl overflow-hidden">
-                <button @click="showAddressForm = !showAddressForm" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-blue-900 bg-blue-100/60 hover:bg-blue-100 transition">
-                    <div class="flex items-center space-x-2">
-                        <span>📍 Dirección de Entrega</span>
-                        <span class="text-[10px] text-blue-600 font-normal" x-text="customer.nombre ? '✓ Ingresados' : '(Rellenar datos)'"></span>
-                    </div>
-                    <span class="text-sm font-bold" x-text="showAddressForm ? '▲ Ocultar' : '▼ Rellenar Datos'"></span>
-                </button>
-
-                <div x-show="showAddressForm" class="p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2" x-cloak>
-                    <input type="text" x-model="customer.nombre" placeholder="Nombre *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <input type="text" x-model="customer.cp" placeholder="Código Postal *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <input type="text" x-model="customer.estado" placeholder="Estado *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <input type="text" x-model="customer.ciudad" placeholder="Ciudad *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <input type="text" x-model="customer.colonia" placeholder="Colonia *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                    <input type="text" x-model="customer.calleNum" placeholder="Calle y número *" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-2">
-                    <input type="text" x-model="customer.apto" placeholder="Apartamento, suite, etc. (opcional)" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none col-span-2 sm:col-span-1">
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between gap-4">
-                <div>
-                    <span class="text-xs text-slate-500 block">Total a Pagar</span>
-                    <div class="flex items-baseline space-x-2">
-                        <span class="text-2xl font-bold text-blue-600" x-text="'$' + totalSaleAmount.toFixed(2)"></span>
-                        <span class="text-xs text-emerald-600 font-semibold" x-show="totalSavings > 0" x-text="'Ahorro: $' + totalSavings.toFixed(2)"></span>
-                    </div>
-                </div>
-
-                <button @click="sendWhatsAppOrder()" 
-                    class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center space-x-2 whitespace-nowrap">
-                    <span>💬 Pedir por WhatsApp</span>
-                </button>
-            </div>
-        </div>
+ <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  <template x-for="product in filteredProducts" :key="product.id">
+   <article class="bg-white rounded-2xl shadow-sm hover:shadow-md transition border border-slate-200 p-4 flex flex-col justify-between">
+    <div><div class="flex justify-between items-start mb-2"><span class="text-[10px] font-bold uppercase px-2.5 py-1 bg-slate-100 text-slate-600 rounded-md tracking-wider capitalize" x-text="product.category"></span><span class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full" x-text="product.badge"></span></div><h3 class="font-bold text-slate-800 text-base mb-1" x-text="product.name"></h3><p class="text-xs text-slate-500 mb-3" x-text="product.description"></p></div>
+    <div class="space-y-2 mt-2">
+     <div class="flex items-center space-x-2"><button @click="updateCart(product,-(product.unit==='barra'?1:0.5))" class="w-8 h-8 rounded-lg bg-slate-100 font-bold">-</button><input type="number" :step="product.unit==='barra'?1:0.5" min="0" x-model.number="cart[product.id]" @input="sanitizeCart(product.id)" class="w-full text-center bg-slate-50 border border-slate-200 rounded-lg py-1 text-sm font-semibold"><span class="text-xs font-medium text-slate-500" x-text="product.unit==='barra'?'barras':product.unit"></span><button @click="updateCart(product,product.unit==='barra'?1:0.5)" class="w-8 h-8 rounded-lg bg-slate-100 font-bold">+</button></div>
+     <template x-if="product.unit!=='barra'"><div class="flex gap-1.5"><button @click="setCartQty(product,0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 text-xs py-1 rounded-md">250ml</button><button @click="setCartQty(product,0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 text-xs py-1 rounded-md">500ml</button><button @click="setCartQty(product,1)" class="flex-1 bg-slate-100 hover:bg-blue-50 text-xs py-1 rounded-md">1L</button></div></template>
+     <button @click="cart[product.id]=0" x-show="cart[product.id]>0" class="w-full bg-rose-50 text-rose-600 text-xs font-semibold py-1.5 rounded-lg">🗑️ Quitar de mi lista</button>
     </div>
+   </article>
+  </template>
+ </section>
+</main>
 
-    <!-- OWNER MODAL -->
-    <div x-show="openOwnerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-cloak>
-        <div @click.outside="openOwnerModal = false" class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
-                <h2 class="text-xl font-bold text-slate-800">🔒 Panel de Control del Dueño</h2>
-                <button @click="openOwnerModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold">✕</button>
-            </div>
+<div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30">
+ <div class="max-w-7xl mx-auto px-4 py-3">
+  <div class="mb-2 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
+   <button @click="showSelectedList=!showSelectedList" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-slate-700 bg-slate-100"><span>📋 Ver lista de productos seleccionados <span class="bg-blue-600 text-white px-2 py-0.5 rounded-full" x-text="activeItemsCount"></span></span><span x-text="showSelectedList?'▲ Ocultar':'▼ Mostrar'"></span></button>
+   <div x-show="showSelectedList" x-cloak class="p-2.5 max-h-28 overflow-y-auto"><template x-for="p in products" :key="'sel'+p.id"><template x-if="cart[p.id]>0"><div class="text-xs py-1"><span x-text="p.name+' ('+cart[p.id]+' '+(p.unit==='barra'?'barras':p.unit)+')'"></span><strong class="text-blue-600 ml-2" x-text="'$'+(calculatePrice(p)*cart[p.id]).toFixed(2)"></strong><button @click="cart[p.id]=0" class="text-rose-500 ml-2">×</button></div></template></template><p x-show="activeItemsCount===0" class="text-xs text-slate-400 text-center">Aún no has agregado productos.</p></div>
+  </div>
+  <div class="mb-2 bg-blue-50 border border-blue-100 rounded-xl overflow-hidden">
+   <button @click="showAddressForm=!showAddressForm" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-blue-900 bg-blue-100/60"><span>📍 Dirección de Entrega <span class="text-blue-600 font-normal" x-text="customer.nombre?'✓ Ingresados':'(Rellenar datos)'"></span></span><span x-text="showAddressForm?'▲ Ocultar':'▼ Rellenar Datos'"></span></button>
+   <div x-show="showAddressForm" x-cloak class="p-2.5 grid grid-cols-2 sm:grid-cols-4 gap-2">
+    <input x-model="customer.nombre" placeholder="Nombre *" class="px-3 py-2 bg-white border rounded-xl text-xs"><input x-model="customer.cp" placeholder="Código Postal *" class="px-3 py-2 bg-white border rounded-xl text-xs"><input x-model="customer.estado" placeholder="Estado *" class="px-3 py-2 bg-white border rounded-xl text-xs"><input x-model="customer.ciudad" placeholder="Ciudad *" class="px-3 py-2 bg-white border rounded-xl text-xs"><input x-model="customer.colonia" placeholder="Colonia *" class="px-3 py-2 bg-white border rounded-xl text-xs"><input x-model="customer.calleNum" placeholder="Calle y número *" class="px-3 py-2 bg-white border rounded-xl text-xs col-span-2"><input x-model="customer.apto" placeholder="Apartamento (opcional)" class="px-3 py-2 bg-white border rounded-xl text-xs col-span-2 sm:col-span-1">
+   </div>
+  </div>
+  <div class="flex items-center justify-between gap-4"><div><span class="text-xs text-slate-500 block">Total a Pagar</span><span class="text-2xl font-bold text-blue-600" x-text="'$'+totalSaleAmount.toFixed(2)"></span><span class="text-xs text-emerald-600 ml-2" x-show="totalSavings>0" x-text="'Ahorro: $'+totalSavings.toFixed(2)"></span></div><button @click="sendWhatsAppOrder()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg text-sm whitespace-nowrap">💬 Pedir por WhatsApp</button></div>
+ </div>
+</div>
 
-            <template x-if="!ownerAuthorized">
-                <div class="py-12 text-center max-w-sm mx-auto space-y-4">
-                    <span class="text-4xl">🔐</span>
-                    <h3 class="font-bold text-slate-700">Ingresa la Contraseña de Administrador</h3>
-                    <input type="password" x-model="pinInput" @keyup.enter="authorizeOwner()" placeholder="Contraseña..." class="w-full text-center px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
-                    <button @click="authorizeOwner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl text-sm transition shadow-md">Acceder al Panel</button>
-                </div>
-            </template>
+<!-- PANEL DEL PROPIETARIO -->
+<div x-show="openOwnerModal" x-cloak class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+ <div @click.outside="closeOwnerPanel()" class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
+  <div class="flex justify-between items-center pb-4 border-b mb-6"><h2 class="text-xl font-bold">🔒 Panel de Control del Dueño</h2><button @click="closeOwnerPanel()" class="w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button></div>
 
-            <template x-if="ownerAuthorized">
-                <div class="space-y-6">
-                    <div class="flex space-x-2 border-b border-slate-200 pb-3">
-                        <button @click="ownerTab = 'margen'" :class="ownerTab === 'margen' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">⚙️ Margen y Costos</button>
-                        <button @click="ownerTab = 'historial'" :class="ownerTab === 'historial' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">📋 Pedidos y Ganancias</button>
-                    </div>
+  <template x-if="!ownerAuthorized">
+   <div class="py-8 text-center max-w-sm mx-auto space-y-4">
+    <span class="text-4xl">🔐</span><h3 class="font-bold text-slate-700">Verificación del propietario</h3>
+    <template x-if="!phoneVerified">
+     <div class="space-y-3">
+      <p class="text-sm text-slate-500">Verifica el teléfono autorizado para recibir un código SMS.</p><p class="font-semibold text-blue-700">+52 554 525 6011</p>
+      <div id="recaptcha-container" class="flex justify-center"></div>
+      <button @click="sendSMS()" :disabled="smsSending" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl disabled:opacity-50" x-text="smsSending?'Enviando SMS...':'Enviar código SMS'"></button>
+      <input x-model="smsCode" inputmode="numeric" maxlength="6" placeholder="Código de 6 dígitos" class="w-full text-center px-4 py-2 border rounded-xl">
+      <button @click="verifySMS()" :disabled="!confirmationResult" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 rounded-xl disabled:opacity-50">Verificar código</button>
+     </div>
+    </template>
+    <template x-if="phoneVerified">
+     <div class="space-y-3"><p class="text-sm text-emerald-700 font-semibold">✓ Teléfono verificado. Ingresa tu contraseña.</p><input type="password" x-model="pinInput" @keyup.enter="authorizeOwner()" placeholder="Contraseña de administrador" class="w-full text-center px-4 py-2 border rounded-xl"><button @click="authorizeOwner()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-xl">Acceder al panel</button></div>
+    </template>
+    <p class="text-xs text-rose-600" x-text="authMessage" x-show="authMessage"></p>
+   </div>
+  </template>
 
-                    <div x-show="ownerTab === 'margen'" class="space-y-6">
-                        <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
-                            <div>
-                                <h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo (Sincronizado)</h4>
-                                <p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p>
-                            </div>
-                            <div class="text-2xl font-bold text-blue-600" x-text="(targetMargin * 100).toFixed(0) + '%'"></div>
-                        </div>
+  <template x-if="ownerAuthorized">
+   <div class="space-y-6">
+    <div class="flex justify-between items-center"><div class="flex gap-2 border-b pb-3"><button @click="ownerTab='margen'" :class="ownerTab==='margen'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">⚙️ Margen y Costos</button><button @click="ownerTab='historial'" :class="ownerTab==='historial'?'bg-blue-600 text-white':'bg-slate-100 text-slate-600'" class="px-4 py-2 rounded-xl text-xs font-semibold">📋 Pedidos y Ganancias</button></div><button @click="logoutOwner()" class="text-xs text-rose-600 underline">Cerrar sesión</button></div>
+    <section x-show="ownerTab==='margen'" class="space-y-5">
+     <div class="bg-blue-50 border p-4 rounded-xl flex items-center justify-between"><div><h4 class="font-bold text-blue-900 text-sm">Porcentaje de Ganancia Objetivo (Sincronizado)</h4><p class="text-xs text-blue-700">Cada envase se cotiza en $10.00.</p></div><div class="text-2xl font-bold text-blue-600" x-text="(targetMargin*100).toFixed(0)+'%'"></div></div>
+     <div><label class="block text-xs font-semibold mb-2">Desliza para cambiar margen (30% al 60%):</label><input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @change="saveMargin()" class="w-full accent-blue-600"></div>
+     <div class="overflow-x-auto border rounded-xl"><table class="w-full text-left text-xs"><thead class="bg-slate-50 uppercase"><tr><th class="p-3">Producto</th><th class="p-3">Costo Insumo</th><th class="p-3">Costo Envase</th><th class="p-3">Costo Total</th><th class="p-3">Precio Venta</th><th class="p-3">Ganancia</th></tr></thead><tbody class="divide-y"><template x-for="p in products" :key="'cost'+p.id"><tr><td class="p-3 font-semibold" x-text="p.name"></td><td class="p-3" x-text="'$'+p.baseCost.toFixed(2)"></td><td class="p-3" x-text="'$'+p.bottleCost.toFixed(2)"></td><td class="p-3" x-text="'$'+(p.baseCost+p.bottleCost).toFixed(2)"></td><td class="p-3 font-bold text-blue-600" x-text="'$'+calculatePrice(p).toFixed(2)"></td><td class="p-3 text-emerald-600" x-text="'$'+(calculatePrice(p)-p.baseCost-p.bottleCost).toFixed(2)"></td></tr></template></tbody></table></div>
+    </section>
+    <section x-show="ownerTab==='historial'" class="space-y-4">
+     <div class="flex justify-between items-center"><h4 class="font-bold text-sm">Registro de Pedidos en la Nube</h4><button @click="clearOrders()" class="text-xs text-rose-600 underline">Limpiar historial</button></div>
+     <template x-if="orders.length===0"><div class="py-10 text-center text-slate-400 bg-slate-50 rounded-xl">Aún no hay pedidos registrados.</div></template>
+     <template x-for="(order,index) in orders" :key="order.id"><article class="border rounded-xl p-4 space-y-3" :class="order.completed?'bg-emerald-50/50 border-emerald-200':'bg-slate-50 border-slate-200'">
+      <div class="flex flex-wrap justify-between gap-2"><div><span class="text-xs font-bold text-blue-600" x-text="'Pedido #'+(orders.length-index)"></span><span class="ml-2 text-xs font-bold" x-text="order.completed?'✓ Completado':'⏳ Pendiente'"></span><h5 class="font-bold text-sm mt-1" x-text="'Cliente: '+(order.customer?.nombre||'Sin nombre')"></h5></div><div class="flex gap-2 items-center"><span class="text-xs text-slate-400" x-text="order.date"></span><button @click="toggleOrderStatus(order)" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-500 text-white" x-text="order.completed?'Marcar Pendiente':'✓ Pedido Completado'"></button></div></div>
+      <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg"><div class="md:col-span-2"><strong>Dirección:</strong> <span x-text="formatAddress(order.customer)"></span></div><div><strong>Total venta:</strong> <span class="text-blue-600 font-bold" x-text="'$'+Number(order.total||0).toFixed(2)"></span></div><div><strong>Costo total:</strong> <span x-text="'$'+Number(order.cogs||0).toFixed(2)"></span></div><div><strong>Ganancia:</strong> <span class="text-emerald-600 font-bold" x-text="'$'+Number(order.profit||0).toFixed(2)"></span></div></div>
+      <div class="text-xs"><strong>Productos:</strong><div class="flex flex-wrap gap-1 mt-1"><template x-for="(item,i) in (order.items||[])" :key="i"><span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md" x-text="item.name+' ('+item.qty+' '+(item.unit==='barra'?'barras':item.unit)+') - Venta: $'+Number(item.subtotal||0).toFixed(2)+' | Ganancia: $'+Number(item.profit||0).toFixed(2)"></span></template></div></div>
+     </article></template>
+    </section>
+   </div>
+  </template>
+ </div>
+</div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-600 mb-2">Desliza para cambiar margen (30% al 60%):</label>
-                            <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @input="saveMargin()" class="w-full accent-blue-600">
-                        </div>
+<script>
+const firebaseConfig={
+ apiKey:"AIzaSyBuE3rzGblNcvgpsGXafFH-GX06BYl0dms",
+ authDomain:"cleanbox-f7a62.firebaseapp.com",
+ projectId:"cleanbox-f7a62",
+ storageBucket:"cleanbox-f7a62.firebasestorage.app",
+ messagingSenderId:"564921106031",
+ appId:"1:564921106031:web:d5b3225a426b6477e5979a",
+ measurementId:"G-2612KRSBP3"
+};
+const firebaseConfigured=!!(firebaseConfig.apiKey&&firebaseConfig.projectId&&firebaseConfig.appId);
+let db=null,auth=null;
+if(firebaseConfigured){
+ try{if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);db=firebase.firestore();auth=firebase.auth();auth.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(console.error);}
+ catch(e){console.error("Error al iniciar Firebase:",e);}
+}
 
-                        <div class="overflow-x-auto border border-slate-200 rounded-xl">
-                            <table class="w-full text-left border-collapse text-xs">
-                                <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
-                                    <tr>
-                                        <th class="p-3">Producto</th>
-                                        <th class="p-3">Costo Insumo</th>
-                                        <th class="p-3">Costo Envase</th>
-                                        <th class="p-3">Costo Total (COGS)</th>
-                                        <th class="p-3">Precio Venta</th>
-                                        <th class="p-3">Ganancia</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-slate-100">
-                                    <template x-for="product in products" :key="product.id">
-                                        <tr class="hover:bg-slate-50">
-                                            <td class="p-3 font-semibold text-slate-800" x-text="product.name"></td>
-                                            <td class="p-3 text-slate-600" x-text="'$' + product.baseCost.toFixed(2)"></td>
-                                            <td class="p-3 text-slate-600" x-text="'$' + product.bottleCost.toFixed(2)"></td>
-                                            <td class="p-3 font-bold text-slate-700" x-text="'$' + (product.baseCost + product.bottleCost).toFixed(2)"></td>
-                                            <td class="p-3 font-bold text-blue-600" x-text="'$' + calculatePrice(product).toFixed(2)"></td>
-                                            <td class="p-3 text-emerald-600 font-semibold" x-text="'$' + (calculatePrice(product) - (product.baseCost + product.bottleCost)).toFixed(2)"></td>
-                                        </tr>
-                                    </template>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div x-show="ownerTab === 'historial'" class="space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos en la Nube (Sincronizado)</h4>
-                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
-                        </div>
-
-                        <template x-if="orders.length === 0">
-                            <div class="py-12 text-center text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
-                                <p class="text-sm">Aún no hay pedidos registrados o cargando desde Firebase...</p>
-                            </div>
-                        </template>
-
-                        <div class="space-y-4">
-                            <template x-for="(order, index) in orders" :key="order.id || index">
-                                <div :class="order.completed ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'" class="border rounded-xl p-4 space-y-3 transition">
-                                    <div class="flex justify-between items-start">
-                                        <div>
-                                            <div class="flex items-center space-x-2">
-                                                <span class="text-xs font-bold text-blue-600 uppercase" x-text="'Pedido #' + (orders.length - index)"></span>
-                                                <span :class="order.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'" class="text-[10px] font-bold px-2 py-0.5 rounded-full" x-text="order.completed ? '✓ Completado' : '⏳ Pendiente'"></span>
-                                            </div>
-                                            <h5 class="font-bold text-slate-800 text-sm mt-1" x-text="'Cliente: ' + (order.customer ? order.customer.nombre : 'Sin nombre')"></h5>
-                                        </div>
-                                        <div class="flex items-center space-x-2">
-                                            <span class="text-xs text-slate-400" x-text="order.date"></span>
-                                            <button @click="toggleOrderStatus(order)" :class="order.completed ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm" x-text="order.completed ? 'Marcar Pendiente' : '✓ Pedido Completado'"></button>
-                                        </div>
-                                    </div>
-
-                                    <div class="text-xs grid grid-cols-1 md:grid-cols-2 gap-2 bg-white p-3 rounded-lg border border-slate-100">
-                                        <div><strong>Dirección de Entrega:</strong> <span class="text-blue-700 font-medium" x-text="(order.customer ? order.customer.calleNum : '') + (order.customer && order.customer.apto ? ' (Apto: ' + order.customer.apto + ')' : '') + ', Col. ' + (order.customer ? order.customer.colonia : '') + ', ' + (order.customer ? order.customer.ciudad : '') + ', ' + (order.customer ? order.customer.estado : '') + ' (C.P. ' + (order.customer ? order.customer.cp : '') + ')'"></span></div>
-                                        <div><strong>Total Venta:</strong> <span class="font-bold text-blue-600" x-text="'$' + (order.total || 0).toFixed(2)"></span></div>
-                                        <div><strong>Costo Total (Insumos + Envases):</strong> <span class="text-slate-600" x-text="'$' + (order.cogs || 0).toFixed(2)"></span></div>
-                                        <div><strong>Ganancia del Pedido:</strong> <span class="font-bold text-emerald-600" x-text="'$' + (order.profit || 0).toFixed(2) + ' (' + (((order.profit || 0)/(order.total || 1))*100).toFixed(1) + '%)'"></span></div>
-                                    </div>
-
-                                    <div class="text-xs text-slate-600">
-                                        <strong>Productos Solicitados:</strong>
-                                        <div class="flex flex-wrap gap-1 mt-1">
-                                            <template x-for="item in (order.items || [])">
-                                                <span class="bg-blue-50 text-blue-700 px-2 py-1 rounded-md" x-text="item.name + ' (' + item.qty + ' ' + (item.unit === 'barra' ? 'barras' : item.unit) + ') - Venta: $' + item.subtotal.toFixed(2) + ' | Ganancia: $' + item.profit.toFixed(2)"></span>
-                                            </template>
-                                        </div>
-                                    </div>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-
-                </div>
-            </template>
-        </div>
-    </div>
-
-    <!-- ALPINE.JS LOGIC -->
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBuE3rzGblnCVgpsGXafFH-GX06BYl0dms",
-            authDomain: "cleanbox-f7a62.firebaseapp.com",
-            projectId: "cleanbox-f7a62",
-            storageBucket: "cleanbox-f7a62.firebasestorage.app",
-            messagingSenderId: "564921106031",
-            appId: "1:564921106031:web:d5b3225a426b6477e5979a",
-            measurementId: "G-2612KRSBP3"
-        };
-
-        // Firebase solo se inicia cuando pegues la configuración REAL de tu proyecto.
-        const firebaseConfigured =
-            firebaseConfig.apiKey !== "TU_API_KEY_DE_FIREBASE" &&
-            firebaseConfig.authDomain !== "tu-proyecto.firebaseapp.com" &&
-            firebaseConfig.projectId !== "tu-proyecto" &&
-            firebaseConfig.appId !== "tu-app-id";
-
-        let db = null;
-        if (firebaseConfigured) {
-            try {
-                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-                db = firebase.firestore();
-            } catch (error) {
-                console.error("No se pudo iniciar Firebase:", error);
-            }
-        }
-
-        function cleanBoxApp() {
-            return {
-                targetMargin: 0.40, 
-                openOwnerModal: false,
-                ownerAuthorized: false,
-                pinInput: '',
-                ownerTab: 'margen',
-                searchQuery: '',
-                selectedCategory: 'todos',
-                showSelectedList: false,
-                showAddressForm: false,
-                
-                customer: {
-                    nombre: '',
-                    cp: '',
-                    estado: '',
-                    ciudad: '',
-                    colonia: '',
-                    calleNum: '',
-                    apto: ''
-                },
-
-                orders: [],
-
-                categories: ['ropa', 'limpieza', 'cremas sólidas', 'cremas líquidas', 'shampoo de manos', 'otros shampoos', 'auto', 'aromatizantes', 'desengrasantes'],
-
-                products: [
-                    { id: 1, name: 'Barra Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
-                    { id: 2, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
-                    { id: 3, name: 'Suavitel azul', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
-                    { id: 4, name: 'Vel Rosita', category: 'ropa', description: 'Jabón líquido para ropa fina y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 48, unit: 'L', badge: 'Top' },
-                    { id: 5, name: 'Vanish', category: 'ropa', description: 'Quitamanchas seguro para ropa blanca y color', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Alta Demanda' },
-                    { id: 6, name: 'Más Color', category: 'ropa', description: 'Detergente líquido protector de colores', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Recomendado' },
-                    { id: 7, name: 'Más Negro', category: 'ropa', description: 'Detergente especial ropa oscura', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 52, unit: 'L', badge: 'Especial' },
-                    { id: 8, name: 'Más Blanco', category: 'ropa', description: 'Blanqueador y detergente ropa blanca', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Básico' },
-                    { id: 9, name: 'Desmugrante', category: 'limpieza', description: 'Elimina mugre y grasa difícil', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Potente' },
-                    { id: 10, name: 'Fabulosos', category: 'limpieza', description: 'Limpiador multiusos desinfectante', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 30, unit: 'L', badge: 'Económico' },
-                    { id: 11, name: 'Pino verde', category: 'limpieza', description: 'Desinfectante pino intenso', baseCost: 8.90, bottleCost: 10.00, supermarketPrice: 28, unit: 'L', badge: 'Tradicional' },
-                    { id: 12, name: 'Cloro', category: 'limpieza', description: 'Cloro activo desinfectante hogar', baseCost: 5.50, bottleCost: 10.00, supermarketPrice: 22, unit: 'L', badge: 'Básico' },
-                    { id: 13, name: 'Quitasarro', category: 'limpieza', description: 'Elimina sarro difícil en baños', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 42, unit: 'L', badge: 'Especializado' },
-                    { id: 14, name: 'Multilimpiador Fab', category: 'limpieza', description: 'Limpiador multiusos general', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Versátil' },
-                    { id: 15, name: 'Jabón líquido Multiusos', category: 'limpieza', description: 'Jabón líquido concentrado multiusos', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Concentrado' },
-                    { id: 16, name: 'Shampoo Lavatrastes', category: 'limpieza', description: 'Arrancagrasa concentrado cocina', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Trastes' },
-                    { id: 17, name: 'Crema T/Nívea Sólida', category: 'cremas sólidas', description: 'Crema sólida humectante corporal', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
-                    { id: 18, name: 'Crema T/Pons Sólida', category: 'cremas sólidas', description: 'Nutrición y suavidad', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
-                    { id: 19, name: 'Crema Bebé Sólida', category: 'cremas sólidas', description: 'Especial para piel sensible', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
-                    { id: 20, name: 'Crema Rosas Sólida', category: 'cremas sólidas', description: 'Aroma fresco floral', baseCost: 63.95, bottleCost: 0.00, supermarketPrice: 120, unit: 'kg', badge: 'Sólida' },
-                    { id: 21, name: 'Crema Concha Nácar Sólida', category: 'cremas sólidas', description: 'Aclarante y nutritiva', baseCost: 94.90, bottleCost: 0.00, supermarketPrice: 160, unit: 'kg', badge: 'Especial' },
-                    { id: 22, name: 'Crema T/Nívea Líquida', category: 'cremas líquidas', description: 'Hidratación profunda corporal', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
-                    { id: 23, name: 'Crema T/Pons Líquida', category: 'cremas líquidas', description: 'Hidratación y cuidado diario', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
-                    { id: 24, name: 'Crema Almendras Líquida', category: 'cremas líquidas', description: 'Suavidad extrema con almendras', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
-                    { id: 25, name: 'Crema Aloe Vera Líquida', category: 'cremas líquidas', description: 'Frescura regeneradora', baseCost: 71.90, bottleCost: 10.00, supermarketPrice: 130, unit: 'L', badge: 'Líquida' },
-                    { id: 26, name: 'Shampoo Manos Manzana', category: 'shampoo de manos', description: 'Suave con tus manos, aroma manzana', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 27, name: 'Shampoo Manos Coco', category: 'shampoo de manos', description: 'Aroma dulce y limpieza delicada', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 28, name: 'Shampoo Manos Almendras', category: 'shampoo de manos', description: 'Protección e hidratación para manos', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 29, name: 'Shampoo Manos Brisa', category: 'shampoo de manos', description: 'Frescura duradera', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 30, name: 'Shampoo Manos Pétalos de Rosa', category: 'shampoo de manos', description: 'Suavidad floral', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 31, name: 'Shampoo Manos Durazno', category: 'shampoo de manos', description: 'Aroma frutal', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 32, name: 'Shampoo Manos Fresa', category: 'shampoo de manos', description: 'Aroma dulce a fresa', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
-                    { id: 33, name: 'Shampoo Perro', category: 'otros shampoos', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
-                    { id: 34, name: 'SH. T/Menen', category: 'otros shampoos', description: 'Fortalecimiento y brillo capilar', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
-                    { id: 35, name: 'SH. Jojoba', category: 'otros shampoos', description: 'Hidratación capilar con jojoba', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
-                    { id: 36, name: 'SH. Sábila', category: 'otros shampoos', description: 'Nutrición natural', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
-                    { id: 37, name: 'SH. P/Auto C/cera', category: 'auto', description: 'Jabón especializado carrocería con cera', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 55, unit: 'L', badge: 'Auto' },
-                    { id: 38, name: 'Allmoroll Liq', category: 'auto', description: 'Protector de vinil y tableros', baseCost: 64.95, bottleCost: 10.00, supermarketPrice: 120, unit: 'L', badge: 'Auto' },
-                    { id: 39, name: 'Abrillantador de llantas', category: 'auto', description: 'Brillo duradero en neumáticos', baseCost: 64.95, bottleCost: 10.00, supermarketPrice: 120, unit: 'L', badge: 'Auto' },
-                    { id: 40, name: 'Limpiaparabrisas', category: 'auto', description: 'Visibilidad impecable', baseCost: 11.90, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Auto' },
-                    { id: 41, name: 'Aromatizante Herbal', category: 'aromatizantes', description: 'Esencia herbal duradera', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-                    { id: 42, name: 'Aromatizante Bosques', category: 'aromatizantes', description: 'Aroma fresco a bosque', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-                    { id: 43, name: 'Aromatizante Mar Fresco', category: 'aromatizantes', description: 'Brisa marina ambiental', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-                    { id: 44, name: 'Aromatizante Vainilla', category: 'aromatizantes', description: 'Dulce aroma a vainilla', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-                    { id: 45, name: 'Aromatizante Cereza', category: 'aromatizantes', description: 'Intenso aroma a cereza', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 65, unit: 'L', badge: 'Aroma' },
-                    { id: 46, name: 'Desengrasante T/Windex', category: 'desengrasantes', description: 'Limpieza impecable en cristales y superficies', baseCost: 27.90, bottleCost: 10.00, supermarketPrice: 60, unit: 'L', badge: 'Potente' },
-                    { id: 47, name: 'Desengrasante Ultravioleta', category: 'desengrasantes', description: 'Removedor de grasa pesada', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' },
-                    { id: 48, name: 'Ultradesengrasante C/Aroma', category: 'desengrasantes', description: 'Poder industrial aromatizado', baseCost: 32.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Potente' }
-                ],
-
-                cart: {},
-
-                init() {
-                    this.products.forEach(p => { this.cart[p.id] = 0; });
-
-                    if (!db) {
-                        console.warn("Clean Box: falta colocar la configuración web real de Firebase.");
-                        return;
-                    }
-
-                    db.collection("settings").doc("config").onSnapshot((doc) => {
-                        if (doc.exists && doc.data().targetMargin !== undefined) {
-                            this.targetMargin = doc.data().targetMargin;
-                        }
-                    }, (error) => {
-                        console.error("Error al sincronizar el margen:", error);
-                    });
-
-                    db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                        this.orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    }, (error) => {
-                        console.error("Error al sincronizar pedidos con Firebase:", error);
-                        alert("No se pudieron cargar los pedidos. Revisa la configuración y las reglas de Firestore.");
-                    });
-                },
-
-                saveMargin() {
-                    if (!db) {
-                        alert("Primero configura Firebase con los datos reales de tu proyecto.");
-                        return;
-                    }
-                    db.collection("settings").doc("config").set({
-                        targetMargin: this.targetMargin
-                    }, { merge: true }).catch(error => {
-                        console.error("Error al guardar margen en la nube:", error);
-                        alert("No se pudo guardar el margen en Firebase: " + error.message);
-                    });
-                },
-
-                calculatePrice(product) {
-                    if (product.id === 1) {
-                        return 25.00;
-                    }
-                    let totalCost = product.baseCost + product.bottleCost;
-                    return totalCost / (1 - this.targetMargin);
-                },
-
-                updateCart(product, amount) {
-                    let current = this.cart[product.id] || 0;
-                    let updated = current + amount;
-                    if (updated < 0) updated = 0;
-                    this.cart[product.id] = Number(updated.toFixed(2));
-                },
-
-                setCartQty(product, qty) {
-                    this.cart[product.id] = qty;
-                },
-
-                sanitizeCart(id) {
-                    if (this.cart[id] < 0 || isNaN(this.cart[id])) {
-                        this.cart[id] = 0;
-                    }
-                },
-
-                clearCart() {
-                    this.products.forEach(p => {
-                        this.cart[p.id] = 0;
-                    });
-                },
-
-                get filteredProducts() {
-                    return this.products.filter(p => {
-                        let matchesCategory = this.selectedCategory === 'todos' || p.category === this.selectedCategory;
-                        let matchesSearch = p.name.toLowerCase().includes(this.searchQuery.toLowerCase()) || 
-                                          p.description.toLowerCase().includes(this.searchQuery.toLowerCase());
-                        return matchesCategory && matchesSearch;
-                    });
-                },
-
-                get activeItemsCount() {
-                    return Object.values(this.cart).filter(qty => qty > 0).length;
-                },
-
-                get totalSaleAmount() {
-                    let total = 0;
-                    this.products.forEach(p => {
-                        let qty = this.cart[p.id] || 0;
-                        total += this.calculatePrice(p) * qty;
-                    });
-                    return total;
-                },
-
-                get totalSavings() {
-                    let savings = 0;
-                    this.products.forEach(p => {
-                        let qty = this.cart[p.id] || 0;
-                        let saleP = this.calculatePrice(p);
-                        let superP = p.supermarketPrice;
-                        savings += (superP - saleP) * qty;
-                    });
-                    return savings > 0 ? savings : 0;
-                },
-
-                authorizeOwner() {
-                    if (this.pinInput === 'niko10emma17') {
-                        this.ownerAuthorized = true;
-                    } else {
-                        alert('Contraseña incorrecta');
-                    }
-                },
-
-                toggleOrderStatus(order) {
-                    if (!db) { alert("Firebase no está configurado."); return; }
-                    db.collection("orders").doc(order.id).update({
-                        completed: !order.completed
-                    }).catch(error => {
-                        alert("Error al actualizar el estado: " + error.message);
-                    });
-                },
-
-                clearOrders() {
-                    if (!db) { alert("Firebase no está configurado."); return; }
-                    if (confirm('¿Estás seguro de eliminar todos los pedidos de la base de datos?')) {
-                        db.collection("orders").get().then(async (querySnapshot) => {
-                            // Firestore limita cada lote a 500 operaciones.
-                            let batch = db.batch();
-                            let count = 0;
-                            for (const doc of querySnapshot.docs) {
-                                batch.delete(doc.ref);
-                                count++;
-                                if (count === 450) { await batch.commit(); batch = db.batch(); count = 0; }
-                            }
-                            if (count) await batch.commit();
-                        }).catch(error => alert("No se pudieron eliminar los pedidos: " + error.message));
-                    }
-                },
-
-                sendWhatsAppOrder() {
-                    if (this.totalSaleAmount <= 0) {
-                        alert('Por favor selecciona al menos un producto para realizar tu pedido.');
-                        return;
-                    }
-
-                    if (!this.customer.nombre || !this.customer.cp || !this.customer.estado || !this.customer.ciudad || !this.customer.colonia || !this.customer.calleNum) {
-                        alert('Por favor completa los campos obligatorios de entrega.');
-                        this.showAddressForm = true;
-                        return;
-                    }
-
-                    const total = this.totalSaleAmount;
-                    let message = `*¡Hola! Nuevo Pedido de Clean Box* 🧹✨
-
-`;
-                    message += `👤 *Cliente:* ${this.customer.nombre}
-`;
-                    message += `📍 *Dirección:* ${this.customer.calleNum} `;
-                    message += `${this.customer.apto ? '(Apto/Suite: ' + this.customer.apto + ') ' : ''}`;
-                    message += `, Col. ${this.customer.colonia}, ${this.customer.ciudad}, ${this.customer.estado} (C.P. ${this.customer.cp})
-
-`;
-                    message += `*Detalle de Productos:*
-`;
-
-                    const orderItems = [];
-                    let totalCogs = 0;
-
-                    this.products.forEach(p => {
-                        const qty = Number(this.cart[p.id]) || 0;
-                        if (qty > 0) {
-                            const subtotal = this.calculatePrice(p) * qty;
-                            const cogsSub = (p.baseCost + p.bottleCost) * qty;
-                            totalCogs += cogsSub;
-                            const itemProfit = subtotal - cogsSub;
-                            const unitLabel = p.unit === 'barra' ? 'barras' : p.unit;
-
-                            message += `- ${p.name}: ${qty} ${unitLabel} ($${subtotal.toFixed(2)})
-`;
-                            orderItems.push({
-                                name: p.name,
-                                qty: qty,
-                                unit: p.unit,
-                                subtotal: subtotal,
-                                profit: itemProfit
-                            });
-                        }
-                    });
-
-                    message += `
-💰 *Total Venta:* $${total.toFixed(2)}
-`;
-                    message += total >= 700
-                        ? `🚚 *Envío:* ¡GRATIS (Compra mayor a $700)!
-`
-                        : `🚚 *Envío:* Estándar
-`;
-                    message += `
-¡Quedo a la espera de la confirmación de entrega!`;
-
-                    // Abrir WhatsApp directamente durante el clic para evitar bloqueos del navegador.
-                    const whatsappUrl = `https://wa.me/5215545256011?text=${encodeURIComponent(message)}`;
-                    const whatsappTab = window.open(whatsappUrl, '_blank');
-
-                    if (!whatsappTab) {
-                        alert('El navegador bloqueó WhatsApp. Permite las ventanas emergentes para esta página e inténtalo de nuevo.');
-                        return;
-                    }
-
-                    // Guardar el pedido en Firebase por separado: si Firebase falla, WhatsApp ya estará abierto.
-                    if (!db) {
-                        alert('WhatsApp se abrió, pero el pedido no se guardó en la nube porque Firebase no está disponible.');
-                        return;
-                    }
-
-                    db.collection('orders').add({
-                        date: new Date().toLocaleString('es-MX'),
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        customer: { ...this.customer },
-                        items: orderItems,
-                        total: total,
-                        cogs: totalCogs,
-                        profit: total - totalCogs,
-                        completed: false
-                    }).then(() => {
-                        console.log('Pedido registrado correctamente en Firebase.');
-                    }).catch(error => {
-                        console.error('Error al registrar el pedido en Firebase:', error);
-                        alert('WhatsApp se abrió, pero Firebase no pudo guardar el pedido. Revisa la configuración y las reglas de seguridad.');
-                    });
-                }
-            }
-        }
-    </script>
+function cleanBoxApp(){
+ return {
+  targetMargin:0.40,openOwnerModal:false,ownerAuthorized:false,phoneVerified:false,pinInput:"",smsCode:"",smsSending:false,authMessage:"",confirmationResult:null,recaptchaVerifier:null,recaptchaWidgetId:null,ownerTab:"margen",searchQuery:"",selectedCategory:"todos",showSelectedList:false,showAddressForm:false,orders:[],ordersUnsubscribe:null,marginUnsubscribe:null,
+  customer:{nombre:"",cp:"",estado:"",ciudad:"",colonia:"",calleNum:"",apto:""},
+  categories:["ropa","limpieza","cremas sólidas","cremas líquidas","shampoo de manos","otros shampoos","auto","aromatizantes","desengrasantes"],
+  products:[
+   {id:1,name:"Barra Zote",category:"ropa",description:"Barra tradicional de 400g",baseCost:25,bottleCost:0,supermarketPrice:32,unit:"barra",badge:"Tradicional"},
+   {id:2,name:"Plancha Fácil",category:"ropa",description:"Líquido para facilitar el planchado",baseCost:13.5,bottleCost:10,supermarketPrice:38,unit:"L",badge:"Práctico"},
+   {id:3,name:"Suavitel azul",category:"ropa",description:"Suavizante de telas aroma fresco",baseCost:15.95,bottleCost:10,supermarketPrice:45,unit:"L",badge:"Popular"},
+   {id:4,name:"Vel Rosita",category:"ropa",description:"Jabón líquido para ropa fina y color",baseCost:15.95,bottleCost:10,supermarketPrice:48,unit:"L",badge:"Top"},
+   {id:5,name:"Vanish",category:"ropa",description:"Quitamanchas seguro para ropa blanca y color",baseCost:15.95,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Alta Demanda"},
+   {id:6,name:"Más Color",category:"ropa",description:"Detergente líquido protector de colores",baseCost:15.95,bottleCost:10,supermarketPrice:50,unit:"L",badge:"Recomendado"},
+   {id:7,name:"Más Negro",category:"ropa",description:"Detergente especial ropa oscura",baseCost:15.95,bottleCost:10,supermarketPrice:52,unit:"L",badge:"Especial"},
+   {id:8,name:"Más Blanco",category:"ropa",description:"Blanqueador y detergente ropa blanca",baseCost:15.95,bottleCost:10,supermarketPrice:50,unit:"L",badge:"Básico"},
+   {id:9,name:"Desmugrante",category:"limpieza",description:"Elimina mugre y grasa difícil",baseCost:32.95,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Potente"},
+   {id:10,name:"Fabulosos",category:"limpieza",description:"Limpiador multiusos desinfectante",baseCost:8.9,bottleCost:10,supermarketPrice:30,unit:"L",badge:"Económico"},
+   {id:11,name:"Pino verde",category:"limpieza",description:"Desinfectante pino intenso",baseCost:8.9,bottleCost:10,supermarketPrice:28,unit:"L",badge:"Tradicional"},
+   {id:12,name:"Cloro",category:"limpieza",description:"Cloro activo desinfectante hogar",baseCost:5.5,bottleCost:10,supermarketPrice:22,unit:"L",badge:"Básico"},
+   {id:13,name:"Quitasarro",category:"limpieza",description:"Elimina sarro difícil en baños",baseCost:11.9,bottleCost:10,supermarketPrice:42,unit:"L",badge:"Especializado"},
+   {id:14,name:"Multilimpiador Fab",category:"limpieza",description:"Limpiador multiusos general",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Versátil"},
+   {id:15,name:"Jabón líquido Multiusos",category:"limpieza",description:"Jabón líquido concentrado multiusos",baseCost:32.95,bottleCost:10,supermarketPrice:60,unit:"L",badge:"Concentrado"},
+   {id:16,name:"Shampoo Lavatrastes",category:"limpieza",description:"Arrancagrasa concentrado cocina",baseCost:32.95,bottleCost:10,supermarketPrice:55,unit:"L",badge:"Trastes"},
+   {id:17,name:"Crema T/Nívea Sólida",category:"cremas sólidas",description:"Crema sólida humectante corporal",baseCost:63.95,bottleCost:0,supermarketPrice:120,unit:"kg",badge:"Sólida"},
+   {id:18,name:"Crema T/Pons Sólida",category:"cremas sólidas",description:"Nutrición y suavidad",baseCost:63.95,bottleCost:0,supermarketPrice:120,unit:"kg",badge:"Sólida"},
+   {id:19,name:"Crema Bebé Sólida",category:"cremas sólidas",description:"Especial para piel sensible",baseCost:63.95,bottleCost:0,supermarketPrice:120,unit:"kg",badge:"Sólida"},
+   {id:20,name:"Crema Rosas Sólida",category:"cremas sólidas",description:"Aroma fresco floral",baseCost:63.95,bottleCost:0,supermarketPrice:120,unit:"kg",badge:"Sólida"},
+   {id:21,name:"Crema Concha Nácar Sólida",category:"cremas sólidas",description:"Aclarante y nutritiva",baseCost:94.9,bottleCost:0,supermarketPrice:160,unit:"kg",badge:"Especial"},
+   {id:22,name:"Crema T/Nívea Líquida",category:"cremas líquidas",description:"Hidratación profunda corporal",baseCost:71.9,bottleCost:10,supermarketPrice:130,unit:"L",badge:"Líquida"},
+   {id:23,name:"Crema T/Pons Líquida",category:"cremas líquidas",description:"Hidratación y cuidado diario",baseCost:71.9,bottleCost:10,supermarketPrice:130,unit:"L",badge:"Líquida"},
+   {id:24,name:"Crema Almendras Líquida",category:"cremas líquidas",description:"Suavidad extrema con almendras",baseCost:71.9,bottleCost:10,supermarketPrice:130,unit:"L",badge:"Líquida"},
+   {id:25,name:"Crema Aloe Vera Líquida",category:"cremas líquidas",description:"Frescura regeneradora",baseCost:71.9,bottleCost:10,supermarketPrice:130,unit:"L",badge:"Líquida"},
+   {id:26,name:"Shampoo Manos Manzana",category:"shampoo de manos",description:"Suave con tus manos, aroma manzana",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:27,name:"Shampoo Manos Coco",category:"shampoo de manos",description:"Aroma dulce y limpieza delicada",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:28,name:"Shampoo Manos Almendras",category:"shampoo de manos",description:"Protección e hidratación para manos",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:29,name:"Shampoo Manos Brisa",category:"shampoo de manos",description:"Frescura duradera",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:30,name:"Shampoo Manos Pétalos de Rosa",category:"shampoo de manos",description:"Suavidad floral",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:31,name:"Shampoo Manos Durazno",category:"shampoo de manos",description:"Aroma frutal",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:32,name:"Shampoo Manos Fresa",category:"shampoo de manos",description:"Aroma dulce a fresa",baseCost:15.95,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Manos"},
+   {id:33,name:"Shampoo Perro",category:"otros shampoos",description:"Especial para el cuidado del pelaje canino",baseCost:16.95,bottleCost:10,supermarketPrice:75,unit:"L",badge:"Mascotas"},
+   {id:34,name:"SH. T/Menen",category:"otros shampoos",description:"Fortalecimiento y brillo capilar",baseCost:15.95,bottleCost:10,supermarketPrice:50,unit:"L",badge:"Cabello"},
+   {id:35,name:"SH. Jojoba",category:"otros shampoos",description:"Hidratación capilar con jojoba",baseCost:15.95,bottleCost:10,supermarketPrice:50,unit:"L",badge:"Cabello"},
+   {id:36,name:"SH. Sábila",category:"otros shampoos",description:"Nutrición natural",baseCost:15.95,bottleCost:10,supermarketPrice:50,unit:"L",badge:"Cabello"},
+   {id:37,name:"SH. P/Auto C/cera",category:"auto",description:"Jabón especializado carrocería con cera",baseCost:16.95,bottleCost:10,supermarketPrice:55,unit:"L",badge:"Auto"},
+   {id:38,name:"Allmoroll Liq",category:"auto",description:"Protector de vinil y tableros",baseCost:64.95,bottleCost:10,supermarketPrice:120,unit:"L",badge:"Auto"},
+   {id:39,name:"Abrillantador de llantas",category:"auto",description:"Brillo duradero en neumáticos",baseCost:64.95,bottleCost:10,supermarketPrice:120,unit:"L",badge:"Auto"},
+   {id:40,name:"Limpiaparabrisas",category:"auto",description:"Visibilidad impecable",baseCost:11.9,bottleCost:10,supermarketPrice:35,unit:"L",badge:"Auto"},
+   {id:41,name:"Aromatizante Herbal",category:"aromatizantes",description:"Esencia herbal duradera",baseCost:27.9,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Aroma"},
+   {id:42,name:"Aromatizante Bosques",category:"aromatizantes",description:"Aroma fresco a bosque",baseCost:27.9,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Aroma"},
+   {id:43,name:"Aromatizante Mar Fresco",category:"aromatizantes",description:"Brisa marina ambiental",baseCost:27.9,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Aroma"},
+   {id:44,name:"Aromatizante Vainilla",category:"aromatizantes",description:"Dulce aroma a vainilla",baseCost:27.9,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Aroma"},
+   {id:45,name:"Aromatizante Cereza",category:"aromatizantes",description:"Intenso aroma a cereza",baseCost:27.9,bottleCost:10,supermarketPrice:65,unit:"L",badge:"Aroma"},
+   {id:46,name:"Desengrasante T/Windex",category:"desengrasantes",description:"Limpieza impecable en cristales y superficies",baseCost:27.9,bottleCost:10,supermarketPrice:60,unit:"L",badge:"Potente"},
+   {id:47,name:"Desengrasante Ultravioleta",category:"desengrasantes",description:"Removedor de grasa pesada",baseCost:32.95,bottleCost:10,supermarketPrice:75,unit:"L",badge:"Potente"},
+   {id:48,name:"Ultradesengrasante C/Aroma",category:"desengrasantes",description:"Poder industrial aromatizado",baseCost:32.95,bottleCost:10,supermarketPrice:75,unit:"L",badge:"Potente"}
+  ],
+  cart:{},
+  init(){
+   this.products.forEach(p=>this.cart[p.id]=0);
+   if(!db||!auth){console.error("Firebase no está disponible.");return;}
+   this.marginUnsubscribe=db.collection("settings").doc("config").onSnapshot(doc=>{if(doc.exists&&typeof doc.data().targetMargin==="number")this.targetMargin=Math.min(.6,Math.max(.3,doc.data().targetMargin));},e=>console.error("Margen:",e));
+   auth.onAuthStateChanged(user=>{
+    this.stopOrdersListener();
+    this.orders=[];
+    this.phoneVerified=!!(user&&user.phoneNumber==="+525545256011");
+    this.ownerAuthorized=false;
+    this.pinInput="";
+    if(user&&!this.phoneVerified){auth.signOut().catch(console.error);}
+    if(this.phoneVerified)this.startOrdersListener();
+   });
+  },
+  async ensureRecaptcha(){
+   if(!auth)throw new Error("Firebase Authentication no está disponible.");
+   if(this.recaptchaVerifier){try{await this.recaptchaVerifier.render();return;}catch(e){this.recaptchaVerifier.clear();this.recaptchaVerifier=null;}}
+   this.recaptchaVerifier=new firebase.auth.RecaptchaVerifier("recaptcha-container",{size:"normal",callback:()=>{this.authMessage="Verificación completada. Ahora pulsa Enviar código SMS.";}, "expired-callback":()=>{this.authMessage="La verificación expiró. Vuelve a marcar el reCAPTCHA.";}});
+   this.recaptchaWidgetId=await this.recaptchaVerifier.render();
+  },
+  async sendSMS(){
+   this.authMessage="";
+   if(!auth){this.authMessage="Firebase no está disponible.";return;}
+   this.smsSending=true;
+   try{
+    await this.ensureRecaptcha();
+    this.confirmationResult=await auth.signInWithPhoneNumber("+525545256011",this.recaptchaVerifier);
+    this.authMessage="Código enviado. Revisa los mensajes SMS de tu teléfono.";
+   }catch(e){console.error(e);this.authMessage="No se pudo enviar el SMS: "+(e.message||e);}
+   finally{this.smsSending=false;}
+  },
+  async verifySMS(){
+   this.authMessage="";
+   if(!this.confirmationResult){this.authMessage="Primero solicita el código SMS.";return;}
+   if(!/^\d{6}$/.test(this.smsCode)){this.authMessage="Escribe el código de 6 dígitos.";return;}
+   try{
+    const result=await this.confirmationResult.confirm(this.smsCode.trim());
+    if(!result.user||result.user.phoneNumber!=="+525545256011"){await auth.signOut();this.phoneVerified=false;this.authMessage="El teléfono verificado no es el autorizado.";return;}
+    this.phoneVerified=true;this.authMessage="Teléfono verificado. Ahora escribe tu contraseña.";
+    if(this.recaptchaVerifier){this.recaptchaVerifier.clear();this.recaptchaVerifier=null;}
+   }catch(e){console.error(e);this.authMessage="Código incorrecto o vencido. "+(e.message||"Inténtalo nuevamente.");}
+  },
+  authorizeOwner(){
+   if(!this.phoneVerified||!auth.currentUser||auth.currentUser.phoneNumber!=="+525545256011"){this.authMessage="Primero verifica el teléfono autorizado por SMS.";return;}
+   if(this.pinInput==="niko10emma17"){this.ownerAuthorized=true;this.ownerTab="margen";this.authMessage="";}
+   else{this.authMessage="Contraseña incorrecta.";}
+  },
+  startOrdersListener(){
+   if(!db||!auth.currentUser||auth.currentUser.phoneNumber!=="+525545256011")return;
+   this.ordersUnsubscribe=db.collection("orders").orderBy("timestamp","desc").onSnapshot(s=>{this.orders=s.docs.map(d=>({id:d.id,...d.data()}));},e=>{console.error("Pedidos:",e);this.authMessage="No se pudieron cargar los pedidos: "+e.message;});
+  },
+  stopOrdersListener(){if(this.ordersUnsubscribe){this.ordersUnsubscribe();this.ordersUnsubscribe=null;}},
+  closeOwnerPanel(){this.openOwnerModal=false;this.ownerAuthorized=false;this.pinInput="";},
+  async logoutOwner(){this.ownerAuthorized=false;this.phoneVerified=false;this.pinInput="";this.smsCode="";this.confirmationResult=null;this.stopOrdersListener();this.orders=[];if(auth)try{await auth.signOut();}catch(e){console.error(e);}},
+  async saveMargin(){
+   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("Verifica tu teléfono e ingresa al panel.");return;}
+   try{await db.collection("settings").doc("config").set({targetMargin:this.targetMargin},{merge:true});}
+   catch(e){console.error(e);alert("No se pudo guardar el margen: "+e.message);}
+  },
+  calculatePrice(p){if(p.id===1)return 25;return(p.baseCost+p.bottleCost)/(1-this.targetMargin);},
+  updateCart(p,n){this.cart[p.id]=Math.max(0,Number(((this.cart[p.id]||0)+n).toFixed(2)));},
+  setCartQty(p,n){this.cart[p.id]=n;},
+  sanitizeCart(id){let n=Number(this.cart[id]);this.cart[id]=Number.isFinite(n)&&n>0?Math.min(n,1000):0;},
+  clearCart(){this.products.forEach(p=>this.cart[p.id]=0);},
+  get filteredProducts(){return this.products.filter(p=>(this.selectedCategory==="todos"||p.category===this.selectedCategory)&&(p.name.toLowerCase().includes(this.searchQuery.toLowerCase())||p.description.toLowerCase().includes(this.searchQuery.toLowerCase())));},
+  get activeItemsCount(){return Object.values(this.cart).filter(q=>q>0).length;},
+  get totalSaleAmount(){return this.products.reduce((s,p)=>s+this.calculatePrice(p)*(Number(this.cart[p.id])||0),0);},
+  get totalSavings(){return Math.max(0,this.products.reduce((s,p)=>s+(p.supermarketPrice-this.calculatePrice(p))*(Number(this.cart[p.id])||0),0));},
+  formatAddress(c){if(!c)return"Sin dirección";return[c.calleNum,c.apto?"Apto: "+c.apto:"",c.colonia?"Col. "+c.colonia:"",c.ciudad,c.estado,c.cp?"C.P. "+c.cp:""].filter(Boolean).join(", ");},
+  async toggleOrderStatus(order){
+   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("No tienes autorización.");return;}
+   try{await db.collection("orders").doc(order.id).update({completed:!order.completed});}
+   catch(e){alert("Error al actualizar: "+e.message);}
+  },
+  async clearOrders(){
+   if(!this.ownerAuthorized||!this.phoneVerified||!db){alert("No tienes autorización.");return;}
+   if(!confirm("¿Estás seguro de eliminar todos los pedidos? Esta acción no se puede deshacer."))return;
+   try{const snap=await db.collection("orders").get();for(let i=0;i<snap.docs.length;i+=450){const batch=db.batch();snap.docs.slice(i,i+450).forEach(d=>batch.delete(d.ref));await batch.commit();}}
+   catch(e){alert("No se pudieron eliminar los pedidos: "+e.message);}
+  },
+  async sendWhatsAppOrder(){
+   if(this.totalSaleAmount<=0){alert("Selecciona al menos un producto.");return;}
+   const required=["nombre","cp","estado","ciudad","colonia","calleNum"];
+   if(required.some(k=>!String(this.customer[k]||"").trim())){alert("Completa los campos obligatorios de entrega.");this.showAddressForm=true;return;}
+   const total=Number(this.totalSaleAmount.toFixed(2));let msg="*¡Hola! Nuevo Pedido de Clean Box* 🧹✨\n\n";
+   msg+=`👤 *Cliente:* ${this.customer.nombre}\n📍 *Dirección:* ${this.formatAddress(this.customer)}\n\n*Detalle de Productos:*\n`;
+   const orderItems=[];let totalCogs=0;
+   this.products.forEach(p=>{const qty=Number(this.cart[p.id])||0;if(qty>0){const subtotal=Number((this.calculatePrice(p)*qty).toFixed(2));const cogs=Number(((p.baseCost+p.bottleCost)*qty).toFixed(2));totalCogs+=cogs;const profit=Number((subtotal-cogs).toFixed(2));msg+=`- ${p.name}: ${qty} ${p.unit==="barra"?"barras":p.unit} ($${subtotal.toFixed(2)})\n`;orderItems.push({name:p.name,qty,unit:p.unit,subtotal,profit});}});
+   msg+=`\n💰 *Total Venta:* $${total.toFixed(2)}\n🚚 *Envío:* ${total>=700?"¡GRATIS (Compra mayor a $700)!":"Estándar"}\n\n¡Quedo a la espera de la confirmación de entrega!`;
+   const wa=window.open("https://wa.me/5215545256011?text="+encodeURIComponent(msg),"_blank");
+   if(!wa){alert("El navegador bloqueó WhatsApp. Permite las ventanas emergentes e inténtalo de nuevo.");return;}
+   if(!db){alert("WhatsApp se abrió, pero Firebase no está disponible para guardar el pedido.");return;}
+   const order={date:new Date().toLocaleString("es-MX"),timestamp:firebase.firestore.FieldValue.serverTimestamp(),customer:{...this.customer},items:orderItems,total,cogs:Number(totalCogs.toFixed(2)),profit:Number((total-totalCogs).toFixed(2)),completed:false};
+   try{await db.collection("orders").add(order);alert("¡Pedido enviado a WhatsApp y registrado correctamente!");}
+   catch(e){console.error(e);alert("WhatsApp se abrió, pero no se pudo guardar el pedido en la nube: "+e.message);}
+  }
+ };
+}
+</script>
 </body>
 </html>
