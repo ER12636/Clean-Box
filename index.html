@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -28,7 +29,6 @@
             </div>
             
             <div class="flex items-center space-x-3">
-                <!-- Anuncio de envío gratis arriba a la derecha -->
                 <div class="hidden md:flex items-center bg-blue-700 text-xs px-3 py-1.5 rounded-lg border border-blue-500 font-medium shadow-sm">
                     <span class="mr-1.5">🚚</span>
                     <span>Envío Gratis en compras mayores a <strong>$700</strong></span>
@@ -39,7 +39,6 @@
                 </button>
             </div>
         </div>
-        <!-- Barra visible en móviles para el anuncio de envío -->
         <div class="md:hidden bg-blue-700 text-center text-xs py-1 px-2 border-t border-blue-500 font-medium">
             🚚 Envío Gratis en compras mayores a <strong>$700</strong>
         </div>
@@ -67,7 +66,7 @@
             </div>
         </div>
 
-        <!-- BARRA DE BÚSQUEDA Y FILTROS DE CATEGORÍA -->
+        <!-- BARRA DE BÚSQUEDA Y FILTROS -->
         <div class="mb-6 space-y-4">
             <div class="relative max-w-md mx-auto md:mx-0">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -108,7 +107,6 @@
                     </div>
 
                     <div>
-                        <!-- Selector de Presentación / Cantidad diferenciado para Barra Zote vs Líquidos/Piezas -->
                         <div class="space-y-2 mt-2">
                             <template x-if="product.unit === 'barra'">
                                 <div class="flex items-center space-x-2">
@@ -126,7 +124,6 @@
                                         <span class="text-xs font-medium text-slate-500" x-text="product.unit"></span>
                                         <button @click="updateCart(product, 0.5)" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center font-bold text-slate-600 transition">+</button>
                                     </div>
-                                    <!-- Botones rápidos -->
                                     <div class="flex gap-1.5 pt-1">
                                         <button @click="setCartQty(product, 0.25)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">250ml</button>
                                         <button @click="setCartQty(product, 0.5)" class="flex-1 bg-slate-100 hover:bg-blue-50 hover:text-blue-600 text-slate-600 text-[11px] font-medium py-1 rounded-md transition">500ml</button>
@@ -135,7 +132,6 @@
                                 </div>
                             </template>
 
-                            <!-- Botón individual de quitar -->
                             <button @click="cart[product.id] = 0" x-show="cart[product.id] > 0" class="w-full mt-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold py-1.5 rounded-lg transition border border-rose-200 flex items-center justify-center space-x-1">
                                 <span>🗑️ Quitar de mi lista</span>
                             </button>
@@ -151,7 +147,6 @@
     <div class="fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-2xl z-30 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 py-3">
             
-            <!-- ACORDEÓN DE LISTA DE PRODUCTOS SELECCIONADOS -->
             <div class="mb-2 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden">
                 <button @click="showSelectedList = !showSelectedList" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 transition">
                     <div class="flex items-center space-x-2">
@@ -179,7 +174,6 @@
                 </div>
             </div>
 
-            <!-- ACORDEÓN DE DATOS DE ENVÍO (Ocultable) -->
             <div class="mb-2 bg-blue-50/70 border border-blue-100 rounded-xl overflow-hidden">
                 <button @click="showAddressForm = !showAddressForm" class="w-full px-3 py-2 flex justify-between items-center text-xs font-bold text-blue-900 bg-blue-100/60 hover:bg-blue-100 transition">
                     <div class="flex items-center space-x-2">
@@ -201,8 +195,6 @@
             </div>
 
             <div class="flex items-center justify-between gap-4">
-                
-                <!-- Resumen de Totales -->
                 <div>
                     <span class="text-xs text-slate-500 block">Total a Pagar</span>
                     <div class="flex items-baseline space-x-2">
@@ -211,17 +203,15 @@
                     </div>
                 </div>
 
-                <!-- Botón WhatsApp -->
                 <button @click="sendWhatsAppOrder()" 
                     class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-6 py-2.5 rounded-xl shadow-lg transition text-sm flex items-center space-x-2 whitespace-nowrap">
                     <span>💬 Pedir por WhatsApp</span>
                 </button>
-
             </div>
         </div>
     </div>
 
-    <!-- OWNER MODAL (PIN PROTECTED) -->
+    <!-- OWNER MODAL -->
     <div x-show="openOwnerModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" x-cloak>
         <div @click.outside="openOwnerModal = false" class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div class="flex justify-between items-center pb-4 border-b border-slate-100 mb-6">
@@ -229,7 +219,6 @@
                 <button @click="openOwnerModal = false" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 font-bold">✕</button>
             </div>
 
-            <!-- PIN Login State -->
             <template x-if="!ownerAuthorized">
                 <div class="py-12 text-center max-w-sm mx-auto space-y-4">
                     <span class="text-4xl">🔐</span>
@@ -239,16 +228,13 @@
                 </div>
             </template>
 
-            <!-- Authorized Owner Content -->
             <template x-if="ownerAuthorized">
                 <div class="space-y-6">
-                    <!-- Pestañas del Panel de Dueño -->
                     <div class="flex space-x-2 border-b border-slate-200 pb-3">
                         <button @click="ownerTab = 'margen'" :class="ownerTab === 'margen' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">⚙️ Margen y Costos</button>
                         <button @click="ownerTab = 'historial'" :class="ownerTab === 'historial' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'" class="px-4 py-2 rounded-xl text-xs font-semibold transition">📋 Pedidos y Ganancias</button>
                     </div>
 
-                    <!-- Pestaña 1: Configurar Margen -->
                     <div x-show="ownerTab === 'margen'" class="space-y-6">
                         <div class="bg-blue-50 border border-blue-100 p-4 rounded-xl flex items-center justify-between">
                             <div>
@@ -263,7 +249,6 @@
                             <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @input="saveMargin()" class="w-full accent-blue-600">
                         </div>
 
-                        <!-- Tabla de Auditoría de Costos -->
                         <div class="overflow-x-auto border border-slate-200 rounded-xl">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead class="bg-slate-50 text-slate-600 uppercase font-semibold">
@@ -292,7 +277,6 @@
                         </div>
                     </div>
 
-                    <!-- Pestaña 2: Historial de Pedidos -->
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos en la Nube (Sincronizado)</h4>
@@ -349,20 +333,32 @@
 
     <!-- ALPINE.JS LOGIC -->
     <script>
-        // CONFIGURACIÓN DE FIREBASE (Asegúrate de colocar tus credenciales aquí si cambias de proyecto)
         const firebaseConfig = {
-            apiKey: "TU_API_KEY_DE_FIREBASE",
-            authDomain: "tu-proyecto.firebaseapp.com",
-            projectId: "tu-proyecto",
-            storageBucket: "tu-proyecto.appspot.com",
-            messagingSenderId: "tu-messaging-sender-id",
-            appId: "tu-app-id"
+            apiKey: "AIzaSyBuE3rzGblnCVgpsGXafFH-GX06BYl0dms",
+            authDomain: "cleanbox-f7a62.firebaseapp.com",
+            projectId: "cleanbox-f7a62",
+            storageBucket: "cleanbox-f7a62.firebasestorage.app",
+            messagingSenderId: "564921106031",
+            appId: "1:564921106031:web:d5b3225a426b6477e5979a",
+            measurementId: "G-2612KRSBP3"
         };
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
+        // Firebase solo se inicia cuando pegues la configuración REAL de tu proyecto.
+        const firebaseConfigured =
+            firebaseConfig.apiKey !== "TU_API_KEY_DE_FIREBASE" &&
+            firebaseConfig.authDomain !== "tu-proyecto.firebaseapp.com" &&
+            firebaseConfig.projectId !== "tu-proyecto" &&
+            firebaseConfig.appId !== "tu-app-id";
+
+        let db = null;
+        if (firebaseConfigured) {
+            try {
+                if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+            } catch (error) {
+                console.error("No se pudo iniciar Firebase:", error);
+            }
         }
-        const db = firebase.firestore();
 
         function cleanBoxApp() {
             return {
@@ -444,34 +440,39 @@
                 cart: {},
 
                 init() {
-                    // Sincronizar el margen de ganancia desde Firebase en tiempo real para todos los dispositivos
+                    this.products.forEach(p => { this.cart[p.id] = 0; });
+
+                    if (!db) {
+                        console.warn("Clean Box: falta colocar la configuración web real de Firebase.");
+                        return;
+                    }
+
                     db.collection("settings").doc("config").onSnapshot((doc) => {
                         if (doc.exists && doc.data().targetMargin !== undefined) {
                             this.targetMargin = doc.data().targetMargin;
                         }
-                    });
-
-                    // Sincronización en tiempo real de los pedidos desde Firebase Firestore
-                    db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                        this.orders = snapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }));
                     }, (error) => {
-                        console.error("Error al sincronizar con Firebase:", error);
+                        console.error("Error al sincronizar el margen:", error);
                     });
 
-                    this.products.forEach(p => {
-                        this.cart[p.id] = 0;
+                    db.collection("orders").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                        this.orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    }, (error) => {
+                        console.error("Error al sincronizar pedidos con Firebase:", error);
+                        alert("No se pudieron cargar los pedidos. Revisa la configuración y las reglas de Firestore.");
                     });
                 },
 
                 saveMargin() {
-                    // Guarda el cambio de margen en la nube para que se actualice en todos los dispositivos
+                    if (!db) {
+                        alert("Primero configura Firebase con los datos reales de tu proyecto.");
+                        return;
+                    }
                     db.collection("settings").doc("config").set({
                         targetMargin: this.targetMargin
                     }, { merge: true }).catch(error => {
                         console.error("Error al guardar margen en la nube:", error);
+                        alert("No se pudo guardar el margen en Firebase: " + error.message);
                     });
                 },
 
@@ -548,6 +549,7 @@
                 },
 
                 toggleOrderStatus(order) {
+                    if (!db) { alert("Firebase no está configurado."); return; }
                     db.collection("orders").doc(order.id).update({
                         completed: !order.completed
                     }).catch(error => {
@@ -556,12 +558,19 @@
                 },
 
                 clearOrders() {
+                    if (!db) { alert("Firebase no está configurado."); return; }
                     if (confirm('¿Estás seguro de eliminar todos los pedidos de la base de datos?')) {
-                        db.collection("orders").get().then((querySnapshot) => {
-                            querySnapshot.forEach((doc) => {
-                                doc.ref.delete();
-                            });
-                        });
+                        db.collection("orders").get().then(async (querySnapshot) => {
+                            // Firestore limita cada lote a 500 operaciones.
+                            let batch = db.batch();
+                            let count = 0;
+                            for (const doc of querySnapshot.docs) {
+                                batch.delete(doc.ref);
+                                count++;
+                                if (count === 450) { await batch.commit(); batch = db.batch(); count = 0; }
+                            }
+                            if (count) await batch.commit();
+                        }).catch(error => alert("No se pudieron eliminar los pedidos: " + error.message));
                     }
                 },
 
@@ -614,9 +623,21 @@
 
                     let profit = this.totalSaleAmount - totalCogs;
 
-                    // Guarda en Firebase y abre WhatsApp con el número correcto 5545256011
+                    if (!db) {
+                        alert("El pedido todavía no se puede registrar: falta configurar Firebase con los datos reales de tu proyecto.");
+                        return;
+                    }
+
+                    // Abrimos la pestaña durante el clic del usuario para evitar que el navegador bloquee WhatsApp.
+                    const whatsappTab = window.open("about:blank", "_blank");
+                    if (!whatsappTab) {
+                        alert("Tu navegador bloqueó la ventana de WhatsApp. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.");
+                        return;
+                    }
+                    whatsappTab.document.write("<p style='font-family:Arial;padding:24px'>Registrando tu pedido de Clean Box...</p>");
+
                     db.collection("orders").add({
-                        date: new Date().toLocaleString(),
+                        date: new Date().toLocaleString("es-MX"),
                         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         customer: { ...this.customer },
                         items: orderItems,
@@ -625,10 +646,13 @@
                         profit: profit,
                         completed: false
                     }).then(() => {
-                        let encoded = encodeURIComponent(message);
-                        window.open(`https://wa.me/5215545256011?text=${encoded}`, '_blank');
+                        const encoded = encodeURIComponent(message);
+                        whatsappTab.location.href = `https://wa.me/5215545256011?text=${encoded}`;
+                        alert("¡Pedido registrado! Ahora puedes enviarlo por WhatsApp.");
                     }).catch((error) => {
-                        alert("Hubo un error al registrar el pedido en la nube: " + error.message);
+                        whatsappTab.close();
+                        console.error("Error al registrar pedido:", error);
+                        alert("Hubo un error al registrar el pedido en Firebase: " + error.message + ". No se abrió WhatsApp para evitar enviar un pedido que no quedó guardado.");
                     });
                 }
             }
