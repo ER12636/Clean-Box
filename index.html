@@ -257,7 +257,7 @@
 
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-2">Desliza para cambiar margen (30% al 60%):</label>
-                            <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" class="w-full accent-blue-600">
+                            <input type="range" min="0.3" max="0.6" step="0.05" x-model.number="targetMargin" @change="saveMargin()" class="w-full accent-blue-600">
                         </div>
 
                         <!-- Tabla de Auditoría de Costos -->
@@ -293,7 +293,7 @@
                     <div x-show="ownerTab === 'historial'" class="space-y-4">
                         <div class="flex justify-between items-center">
                             <h4 class="font-bold text-slate-800 text-sm">Registro de Pedidos Realizados</h4>
-                            <button @click="orders = []" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
+                            <button @click="clearOrders()" class="text-xs text-rose-600 hover:underline">Limpiar historial</button>
                         </div>
 
                         <template x-if="orders.length === 0">
@@ -315,7 +315,7 @@
                                         </div>
                                         <div class="flex items-center space-x-2">
                                             <span class="text-xs text-slate-400" x-text="order.date"></span>
-                                            <button @click="order.completed = !order.completed" :class="order.completed ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm" x-text="order.completed ? 'Marcar Pendiente' : '✓ Pedido Completado'"></button>
+                                            <button @click="toggleOrderStatus(index)" :class="order.completed ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' : 'bg-emerald-500 text-white hover:bg-emerald-600'" class="text-xs font-semibold px-3 py-1.5 rounded-lg transition shadow-sm" x-text="order.completed ? 'Marcar Pendiente' : '✓ Pedido Completado'"></button>
                                         </div>
                                     </div>
 
@@ -348,7 +348,7 @@
     <script>
         function cleanBoxApp() {
             return {
-                targetMargin: 0.40, // 40% margen inicial por defecto
+                targetMargin: 0.40, 
                 openOwnerModal: false,
                 ownerAuthorized: false,
                 pinInput: '',
@@ -373,7 +373,7 @@
                 categories: ['ropa', 'limpieza', 'cremas sólidas', 'cremas líquidas', 'shampoo de manos', 'otros shampoos', 'auto', 'aromatizantes', 'desengrasantes'],
 
                 products: [
-                    // --- SECCIÓN ROPA Y FOTOGRAFÍAS ---
+                    // --- SECCIÓN ROPA Y FOTOGRAFÍAS (Zote a $25 exacto) ---
                     { id: 1, name: 'Barra Zote', category: 'ropa', description: 'Barra tradicional de 400g', baseCost: 25.00, bottleCost: 0.00, supermarketPrice: 32, unit: 'barra', badge: 'Tradicional' },
                     { id: 2, name: 'Plancha Fácil', category: 'ropa', description: 'Líquido para facilitar el planchado', baseCost: 13.50, bottleCost: 10.00, supermarketPrice: 38, unit: 'L', badge: 'Práctico' },
                     { id: 3, name: 'Suavitel azul', category: 'ropa', description: 'Suavizante de telas aroma fresco', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 45, unit: 'L', badge: 'Popular' },
@@ -415,7 +415,7 @@
                     { id: 31, name: 'Shampoo Manos Durazno', category: 'shampoo de manos', description: 'Aroma frutal', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
                     { id: 32, name: 'Shampoo Manos Fresa', category: 'shampoo de manos', description: 'Aroma dulce a fresa', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 35, unit: 'L', badge: 'Manos' },
 
-                    // --- OTROS SHAMPOOS (Sin Shampoo de Chile) ---
+                    // --- OTROS SHAMPOOS ---
                     { id: 33, name: 'Shampoo Perro', category: 'otros shampoos', description: 'Especial para el cuidado del pelaje canino', baseCost: 16.95, bottleCost: 10.00, supermarketPrice: 75, unit: 'L', badge: 'Mascotas' },
                     { id: 34, name: 'SH. T/Menen', category: 'otros shampoos', description: 'Fortalecimiento y brillo capilar', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
                     { id: 35, name: 'SH. Jojoba', category: 'otros shampoos', description: 'Hidratación capilar con jojoba', baseCost: 15.95, bottleCost: 10.00, supermarketPrice: 50, unit: 'L', badge: 'Cabello' },
@@ -443,12 +443,36 @@
                 cart: {},
 
                 init() {
+                    // Cargar margen guardado si existe
+                    let savedMargin = localStorage.getItem('cleanbox_target_margin');
+                    if (savedMargin !== null) {
+                        this.targetMargin = parseFloat(savedMargin);
+                    }
+
+                    // Cargar pedidos guardados en el navegador para que no se pierdan al actualizar
+                    let savedOrders = localStorage.getItem('cleanbox_orders');
+                    if (savedOrders) {
+                        try {
+                            this.orders = JSON.parse(savedOrders);
+                        } catch(e) {
+                            this.orders = [];
+                        }
+                    }
+
                     this.products.forEach(p => {
                         this.cart[p.id] = 0;
                     });
                 },
 
+                saveMargin() {
+                    localStorage.setItem('cleanbox_target_margin', this.targetMargin);
+                },
+
                 calculatePrice(product) {
+                    // Si es Barra Zote (id: 1), su precio fijo de venta es $25.00
+                    if (product.id === 1) {
+                        return 25.00;
+                    }
                     let totalCost = product.baseCost + product.bottleCost;
                     return totalCost / (1 - this.targetMargin);
                 },
@@ -517,6 +541,18 @@
                     }
                 },
 
+                toggleOrderStatus(index) {
+                    this.orders[index].completed = !this.orders[index].completed;
+                    localStorage.setItem('cleanbox_orders', JSON.stringify(this.orders));
+                },
+
+                clearOrders() {
+                    if (confirm('¿Estás seguro de limpiar todo el historial de pedidos?')) {
+                        this.orders = [];
+                        localStorage.removeItem('cleanbox_orders');
+                    }
+                },
+
                 sendWhatsAppOrder() {
                     if (this.totalSaleAmount <= 0) {
                         alert('Por favor selecciona al menos un producto para realizar tu pedido.');
@@ -564,7 +600,7 @@
                     }
                     message += `\n¡Quedo a la espera de la confirmación de entrega!`;
 
-                    // Guardar en Historial del Dueño con Estado Pendiente y Ganancia por producto
+                    // Guardar en Historial del Dueño y persistir en localStorage
                     let profit = this.totalSaleAmount - totalCogs;
                     this.orders.unshift({
                         date: new Date().toLocaleString(),
@@ -575,6 +611,8 @@
                         profit: profit,
                         completed: false
                     });
+
+                    localStorage.setItem('cleanbox_orders', JSON.stringify(this.orders));
 
                     // Abrir WhatsApp
                     let encoded = encodeURIComponent(message);
